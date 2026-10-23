@@ -50,7 +50,7 @@ python manage.py seed_demo --reset          # видалити й створит
 
 ## Тести
 ```bash
-python manage.py test                       # 126 тестів; потрібен доступ до MySQL (Django створить тестову БД)
+python manage.py test                       # 136 тестів; потрібен доступ до MySQL (Django створить тестову БД)
 DB_ENGINE=sqlite python manage.py test      # швидкий запуск без MySQL
 ```
 
