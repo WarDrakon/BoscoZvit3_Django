@@ -1,0 +1,7 @@
+{% if page.paginator.num_pages > 1 %}
+<nav class="pager" aria-label="Сторінки">
+  {% if page.has_previous %}<a class="btn btn-secondary btn-sm" href="?{% if query %}{{ query }}&{% endif %}page={{ page.previous_page_number }}">Назад</a>{% endif %}
+  <span class="muted small">Сторінка {{ page.number }} з {{ page.paginator.num_pages }}</span>
+  {% if page.has_next %}<a class="btn btn-secondary btn-sm" href="?{% if query %}{{ query }}&{% endif %}page={{ page.next_page_number }}">Далі</a>{% endif %}
+</nav>
+{% endif %}

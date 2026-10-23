@@ -1,0 +1,1 @@
+{% if profile.photo %}<img class="avatar{% if large %} avatar-lg{% endif %}" src="{{ profile.photo.url }}" alt="Фото: {{ profile.display_name }}">{% else %}<span class="avatar{% if large %} avatar-lg{% endif %}" aria-hidden="true">{{ profile.display_name|slice:":1"|upper }}</span>{% endif %}
