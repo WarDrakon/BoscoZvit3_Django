@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+{% block title %}Заблоковані користувачі — Roommate{% endblock %}
+{% block content %}
+<div class="page"><div class="narrow">
+  <div class="page-head"><h1>Заблоковані користувачі</h1></div>
+  <div class="card">
+    {% for b in blocks %}<div class="row-item"><div class="row-main"><strong>{{ b.blocked.profile.display_name }}</strong><div class="muted small">з {{ b.created_at|date:"d.m.Y" }}</div></div>
+      <form method="post" action="{% url 'interactions:unblock' b.blocked_id %}">{% csrf_token %}<button class="btn btn-secondary btn-sm" type="submit">Розблокувати</button></form></div>
+    {% empty %}<p class="muted" style="margin:0">Ви нікого не блокували.</p>{% endfor %}
+  </div>
+</div></div>
+{% endblock %}

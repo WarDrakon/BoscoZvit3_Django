@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Запити на контакт — Roommate{% endblock %}
+{% block content %}
+<section class="banner"><div class="container"><div class="page-head"><h1>Запити на контакт</h1><a class="btn btn-light" href="{% url 'interactions:blocks' %}">Заблоковані</a></div></div></section>
+<div class="page"><div class="container">
+  
+  <div class="card"><h2>Вхідні</h2>
+    {% for r in incoming %}
+      <div class="row-item">{% include "components/avatar.html" with profile=r.sender.profile %}
+        <div class="row-main"><a href="{% url 'matching:candidate' r.sender.profile.pk %}"><strong>{{ r.sender.profile.display_name }}</strong></a>
+          {% if r.housing %}<span class="muted small"> · щодо «{{ r.housing.title }}»</span>{% endif %}
+          <div class="muted small">{{ r.created_at|date:"d.m.Y H:i" }} · <span class="tag {% if r.status == 'accepted' %}tag-good{% elif r.status == 'pending' %}tag-warn{% endif %}">{{ r.get_status_display }}</span></div>
+          {% if r.message %}<p style="margin:.4rem 0 0">{{ r.message }}</p>{% endif %}</div>
+        {% if r.status == 'pending' %}<div class="btn-row">
+          <form class="inline" method="post" action="{% url 'interactions:respond' r.pk 'accept' %}">{% csrf_token %}<button class="btn btn-primary btn-sm" type="submit">Прийняти</button></form>
+          <form class="inline" method="post" action="{% url 'interactions:respond' r.pk 'decline' %}">{% csrf_token %}<button class="btn btn-secondary btn-sm" type="submit">Відхилити</button></form></div>{% endif %}
+      </div>
+    {% empty %}<p class="muted">Вхідних запитів поки немає.</p>{% endfor %}
+  </div>
+  <div class="card"><h2>Надіслані</h2>
+    {% for r in outgoing %}
+      <div class="row-item">{% include "components/avatar.html" with profile=r.receiver.profile %}
+        <div class="row-main"><a href="{% url 'matching:candidate' r.receiver.profile.pk %}"><strong>{{ r.receiver.profile.display_name }}</strong></a>
+          {% if r.housing %}<span class="muted small"> · щодо «{{ r.housing.title }}»</span>{% endif %}
+          <div class="muted small">{{ r.created_at|date:"d.m.Y H:i" }} · <span class="tag {% if r.status == 'accepted' %}tag-good{% elif r.status == 'declined' %}tag-bad{% endif %}">{{ r.get_status_display }}</span></div></div>
+        {% if r.status == 'pending' %}<form class="inline" method="post" action="{% url 'interactions:cancel' r.pk %}">{% csrf_token %}<button class="btn btn-secondary btn-sm" type="submit">Скасувати</button></form>{% endif %}
+        {% if r.status == 'accepted' %}<a class="btn btn-primary btn-sm" href="{% url 'chat:list' %}">До чату</a>{% endif %}
+      </div>
+    {% empty %}<p class="muted">Ви ще не надсилали запитів. Знайдіть кандидата в <a href="{% url 'matching:recommendations' %}">рекомендаціях</a>.</p>{% endfor %}
+  </div>
+</div></div>
+{% endblock %}

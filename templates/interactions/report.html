@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Скарга — Roommate{% endblock %}
+{% block content %}
+<div class="page"><div class="narrow">
+  <div class="page-head"><h1>{{ title }}</h1></div>
+  <div class="card"><p class="muted">Модератори розглянуть скаргу. Опишіть, що саме порушує правила.</p>
+    <form method="post" novalidate data-loading>{% csrf_token %}{% include "components/form_fields.html" %}
+      <div class="form-actions"><button class="btn btn-danger" type="submit">Надіслати скаргу</button><a class="btn btn-secondary" href="{% url 'profiles:dashboard' %}">Скасувати</a></div></form></div>
+</div></div>
+{% endblock %}

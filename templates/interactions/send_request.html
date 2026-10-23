@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Запит на контакт — Roommate{% endblock %}
+{% block content %}
+<div class="page"><div class="narrow">
+  <div class="page-head"><h1>Запит для {{ receiver.profile.display_name }}</h1></div>
+  <div class="card">
+    <p class="muted">Користувач отримає ваш запит і зможе прийняти або відхилити його. Після прийняття відкриється приватний чат.{% if housing %} Запит стосується оголошення «{{ housing.title }}».{% endif %}</p>
+    <form method="post" novalidate data-loading>{% csrf_token %}{% if housing %}<input type="hidden" name="housing" value="{{ housing.pk }}">{% endif %}
+      {% include "components/form_fields.html" %}
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Надіслати запит</button><a class="btn btn-secondary" href="{% url 'matching:candidate' receiver.profile.pk %}">Скасувати</a></div></form>
+  </div>
+</div></div>
+{% endblock %}
