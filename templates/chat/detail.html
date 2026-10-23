@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Чат: {{ other.profile.display_name }} — Roommate{% endblock %}
+{% block content %}
+<div class="page"><div class="narrow">
+  <div class="card chat-shell" id="chat" data-messages-url="{% url 'chat:messages' conversation.pk %}" data-send-url="{% url 'chat:send' conversation.pk %}">
+    <div class="chat-head">{% include "components/avatar.html" with profile=other.profile %}
+      <div style="flex:1"><a href="{% url 'matching:candidate' other.profile.pk %}"><strong>{{ other.profile.display_name }}</strong></a><div class="muted small">Приватна розмова</div></div>
+      <div class="btn-row">
+        {% if i_blocked %}
+          <form class="inline" method="post" action="{% url 'interactions:unblock' other.pk %}">{% csrf_token %}<button class="btn btn-secondary btn-sm" type="submit">Розблокувати</button></form>
+        {% else %}
+          <form class="inline" method="post" action="{% url 'interactions:block' other.pk %}" data-confirm="Заблокувати цього користувача? Надсилати повідомлення стане неможливо.">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">Заблокувати</button></form>
+        {% endif %}
+        <a class="btn btn-ghost btn-sm" href="{% url 'chat:list' %}">Усі розмови</a>
+      </div></div>
+    <div class="chat-log" id="chat-log" aria-live="polite" aria-label="Повідомлення"></div>
+    <div class="chat-status" id="chat-status" role="status">{% if blocked %}Надсилання недоступне: один із користувачів заблокований.{% endif %}</div>
+    <form class="chat-form" id="chat-form">{% csrf_token %}
+      <label class="sr-only" for="chat-input">Ваше повідомлення</label>
+      <textarea class="input" id="chat-input" rows="1" maxlength="2000" placeholder="Напишіть повідомлення…" {% if blocked %}disabled{% endif %}></textarea>
+      <button class="btn btn-primary" id="chat-send" type="submit" {% if blocked %}disabled{% endif %}>Надіслати</button>
+    </form>
+  </div>
+</div></div>
+{% endblock %}
+{% block scripts %}{% load static %}<script src="{% static 'js/chat.js' %}"></script>{% endblock %}

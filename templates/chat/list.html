@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}Чат — Roommate{% endblock %}
+{% block content %}
+<section class="banner"><div class="container"><div class="page-head"><h1>Мої розмови</h1></div></div></section>
+<div class="page"><div class="narrow">
+  
+  <div class="card" style="padding:0;overflow:hidden">
+    {% for c in conversations %}
+      <a class="convo" href="{% url 'chat:detail' c.pk %}">{% include "components/avatar.html" with profile=c.other.profile %}
+        <div style="flex:1;min-width:0"><strong>{{ c.other.profile.display_name }}</strong>
+          <div class="muted small" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{% if c.last %}{% if c.last.sender_id == user.pk %}Ви: {% endif %}{{ c.last.text }}{% else %}Розмову розпочато. Напишіть перше повідомлення.{% endif %}</div></div>
+        <div class="muted small" style="text-align:right">{% if c.last %}{{ c.last.created_at|date:"d.m H:i" }}{% endif %}{% if c.unread %}<br><span class="badge">{{ c.unread }}</span>{% endif %}</div></a>
+    {% empty %}<div class="empty"><h3>Розмов поки немає</h3><p>Чат відкривається після того, як хтось прийме ваш запит на контакт.</p><a class="btn btn-primary" href="{% url 'matching:recommendations' %}">Знайти співмешканця</a></div>{% endfor %}
+  </div>
+</div></div>
+{% endblock %}
