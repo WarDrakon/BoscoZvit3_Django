@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <div class="container hero-grid">
+    <div>
+      <span class="eyebrow">{% include "components/icon.html" with name="target" %} Підбір співмешканців за сумісністю</span>
+      <h1>Знайдіть співмешканця, з яким вам справді комфортно жити</h1>
+      <p class="lead">Roommate порівнює побутові звички, бюджети й вимоги двох людей та показує, де ви збігаєтесь, а де можуть виникнути конфлікти. Кожен відсоток має пояснення, а остаточне рішення завжди за вами.</p>
+      <div class="btn-row">
+        {% if user.is_authenticated %}
+          <a class="btn btn-accent btn-lg" href="{% url 'matching:recommendations' %}">Дивитися співмешканців {% include "components/icon.html" with name="arrow" %}</a>
+          <a class="btn btn-light btn-lg" href="{% url 'profiles:dashboard' %}">Мій кабінет</a>
+        {% else %}
+          <a class="btn btn-accent btn-lg" href="{% url 'accounts:register' %}">Створити акаунт {% include "components/icon.html" with name="arrow" %}</a>
+          <a class="btn btn-light btn-lg" href="{% url 'accounts:login' %}">Увійти</a>
+        {% endif %}
+      </div>
+      <ul class="hero-points">
+        <li>{% include "components/icon.html" with name="check" %} Безкоштовна реєстрація</li>
+        <li>{% include "components/icon.html" with name="check" %} Прозорий розрахунок</li>
+        <li>{% include "components/icon.html" with name="check" %} Контакти приховані до вашої згоди</li>
+      </ul>
+    </div>
+    <div class="stage" aria-label="Приклад пояснення сумісності">
+      <div class="card demo">
+        <div class="demo-top">
+          <div class="cand-head"><span class="avatar" aria-hidden="true">А</span><div><div class="cand-name">Андрій</div><div class="muted small">Львів · студент</div></div></div>
+          <div class="ring" style="--p:89"><span>89%</span></div>
+        </div>
+        <div class="demo-row"><span>Бюджет</span><div class="bar"><i style="width:95%"></i></div><b>95%</b></div>
+        <div class="demo-row"><span>Чистота</span><div class="bar"><i style="width:100%"></i></div><b>100%</b></div>
+        <div class="demo-row"><span>Режим сну</span><div class="bar"><i style="width:85%"></i></div><b>85%</b></div>
+        <div class="demo-row"><span>Гості</span><div class="bar bad"><i style="width:40%"></i></div><b>40%</b></div>
+        <p class="demo-note">Приклад формату результату. Реальні дані залежать від ваших анкет.</p>
+      </div>
+      <div class="float b">{% include "components/icon.html" with name="shield" %} Критичні вимоги перевіряються першими</div>
+      <div class="float a">{% include "components/icon.html" with name="home" %} Є житло · Франківський · 6500 грн</div>
+    </div>
+  </div>
+</section>
+
+<section class="stats">
+  <div class="container stats-grid">
+    <div class="stat"><b>10</b><span>критеріїв сумісності: від бюджету до побуту</span></div>
+    <div class="stat"><b>1–5</b><span>власна вага для кожного критерію</span></div>
+    <div class="stat"><b>2 боки</b><span>враховуємо вимоги обох людей, а не лише ваші</span></div>
+  </div>
+</section>
+
+<section class="block" id="how">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow light">Процес</span><h2>Як працює підбір</h2><p>Чотири кроки від реєстрації до першої розмови.</p></div>
+    <ol class="process">
+      <li><h3>Опишіть себе</h3><p>Режим сну, охайність, шум, гості, куріння, тварини: як є насправді.</p></li>
+      <li><h3>Задайте вимоги</h3><p>Бюджет, район, дата заселення та важливість кожного критерію від 1 до 5.</p></li>
+      <li><h3>Отримайте рекомендації</h3><p>Система враховує вимоги обох сторін і пояснює сильні сторони та ризики.</p></li>
+      <li><h3>Зв’яжіться й вирішіть</h3><p>Надішліть запит, а після згоди спілкуйтеся в приватному чаті.</p></li>
+    </ol>
+  </div>
+</section>
+
+<section class="block dark">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow">Можливості</span><h2>Чому Roommate, а не звичайний пошук житла</h2><p>Квартиру знайти легко. Складніше знайти людину, з якою буде добре в одному просторі.</p></div>
+    <div class="grid grid-3">
+      <div class="card feature"><h3><span class="ico">{% include "components/icon.html" with name="sliders" %}</span>Десять критеріїв</h3><p>Бюджет, район, дата, режим сну, чистота, шум, гості, куріння, тварини, побут. Важливе для вас впливає сильніше.</p></div>
+      <div class="card feature"><h3><span class="ico">{% include "components/icon.html" with name="shield" %}</span>Критичні вимоги</h3><p>Куріння чи тварини категорично «ні»? Такі кандидати не потраплять до основних рекомендацій без попередження.</p></div>
+      <div class="card feature"><h3><span class="ico">{% include "components/icon.html" with name="users" %}</span>Взаємна сумісність</h3><p>Враховуємо не лише ваші очікування, а й очікування другої людини.</p></div>
+      <div class="card feature"><h3><span class="ico">{% include "components/icon.html" with name="check" %}</span>Прозорі пояснення</h3><p>Бачите оцінку за кожним критерієм, а не просто загальний відсоток.</p></div>
+      <div class="card feature"><h3><span class="ico">{% include "components/icon.html" with name="home" %}</span>Оголошення й фото</h3><p>Додайте житло з фотографіями. Точна адреса відкривається лише після прийнятого запиту.</p></div>
+      <div class="card feature"><h3><span class="ico">{% include "components/icon.html" with name="lock" %}</span>Приватність</h3><p>Пошта й телефон не показуються стороннім. Чат відкривається лише після взаємної згоди.</p></div>
+    </div>
+  </div>
+</section>
+
+<section class="block">
+  <div class="container">
+    <div class="section-head"><span class="eyebrow light">Сценарії</span><h2>Для двох ситуацій</h2></div>
+    <div class="grid grid-2">
+      <div class="card scenario s1"><h3>{% include "components/icon.html" with name="search" %} Шукаю житло разом</h3><p>Знайдіть людину, з якою зніматимете квартиру.</p><ul><li>Порівняйте звички й бюджет до знайомства</li><li>Побачте можливі конфлікти заздалегідь</li></ul></div>
+      <div class="card scenario s2"><h3>{% include "components/icon.html" with name="home" %} Маю житло</h3><p class="muted">Опублікуйте оголошення й оберіть співмешканця свідомо.</p><ul><li>Оголошення з фото та ціною на одну людину</li><li>Рекомендації кандидатів із поясненням</li></ul></div>
+    </div>
+  </div>
+</section>
+
+<section class="block" style="padding-top:0">
+  <div class="container">
+    <div class="cta">
+      <div><h2>Почніть із п’яти хвилин на анкеті</h2><p>Чим повніше дані, тим точніші рекомендації.</p></div>
+      {% if user.is_authenticated %}<a class="btn btn-accent btn-lg" href="{% url 'profiles:dashboard' %}">Перейти до кабінету</a>
+      {% else %}<a class="btn btn-accent btn-lg" href="{% url 'accounts:register' %}">Зареєструватися безкоштовно</a>{% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
