@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Параметри пошуку — Roommate{% endblock %}
+{% block content %}
+<div class="page"><div class="narrow">
+  <div class="page-head"><h1>Параметри пошуку</h1></div>
+  <form method="post" novalidate data-loading>
+    {% csrf_token %}
+    {% if form.non_field_errors %}<div class="form-error" role="alert">{{ form.non_field_errors }}</div>{% endif %}
+    <div class="card">
+      <fieldset><legend>Де і за скільки</legend>
+        <div class="form-grid">
+          {% include "components/field.html" with field=form.city %}{% include "components/field.html" with field=form.district %}
+          {% include "components/field.html" with field=form.budget_min %}{% include "components/field.html" with field=form.budget_max %}
+          {% include "components/field.html" with field=form.move_in_date %}
+        </div>
+      </fieldset>
+    </div>
+    <div class="card">
+      <fieldset><legend>Вимоги до співмешканця</legend>
+        <p class="muted small">Оберіть «Неважливо», якщо критерій для вас не має значення — він не впливатиме на результат.</p>
+        <div class="form-grid">
+          {% include "components/field.html" with field=form.req_sleep %}{% include "components/field.html" with field=form.req_min_cleanliness %}
+          {% include "components/field.html" with field=form.req_max_noise %}{% include "components/field.html" with field=form.req_guests %}
+          {% include "components/field.html" with field=form.req_smoking %}{% include "components/field.html" with field=form.req_pets %}
+          {% include "components/field.html" with field=form.req_chores %}
+        </div>
+      </fieldset>
+    </div>
+    <div class="card">
+      <fieldset><legend>Важливість критеріїв</legend>
+        <p class="muted small">Вага від 1 (майже не важливо) до 5 (дуже важливо) визначає внесок критерію в підсумковий відсоток. «Критична» означає, що порушення цієї вимоги робить кандидата неприйнятним — такі кандидати показуються окремо із попередженням.</p>
+        <div class="table-scroll"><table class="weights"><thead><tr><th scope="col">Критерій</th><th scope="col">Вага</th><th scope="col">Критична</th></tr></thead><tbody>
+          {% for row in form.weight_rows %}<tr><td>{{ row.label }}</td><td>{{ row.weight }}</td><td>{{ row.critical }}</td></tr>{% endfor %}
+        </tbody></table></div>
+      </fieldset>
+    </div>
+    <div class="form-actions"><button class="btn btn-primary" type="submit">Зберегти та показати рекомендації</button><a class="btn btn-secondary" href="{% url 'profiles:view' %}">Скасувати</a></div>
+  </form>
+</div></div>
+{% endblock %}

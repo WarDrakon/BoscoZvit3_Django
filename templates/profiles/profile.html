@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Мій профіль — Roommate{% endblock %}
+{% block content %}
+<section class="banner"><div class="container"><div class="page-head"><h1>Мій профіль</h1>
+    <div class="btn-row"><a class="btn btn-accent" href="{% url 'profiles:edit' %}">Редагувати профіль</a>
+    <a class="btn btn-light" href="{% url 'profiles:lifestyle' %}">Анкета звичок</a>
+    <a class="btn btn-light" href="{% url 'profiles:search' %}">Параметри пошуку</a></div></div></div></section>
+<div class="page"><div class="container">
+  
+  <div class="grid grid-2">
+    <div class="card">
+      <div class="cand-head" style="margin-bottom:1rem">{% include "components/avatar.html" with large=True %}
+        <div><h2 style="margin:0">{{ profile.display_name }}</h2><div class="muted">{{ profile.city|default:"Місто не вказано" }}</div>
+        <div class="tags" style="margin-top:.4rem"><span class="tag">{{ profile.get_search_mode_display }}</span>
+        {% if profile.is_active_search %}<span class="tag tag-good">Шукаю зараз</span>{% else %}<span class="tag tag-warn">Пошук призупинено</span>{% endif %}</div></div></div>
+      <dl class="facts">
+        <dt>Рід занять</dt><dd>{{ profile.occupation|default:"—" }}</dd>
+        <dt>Заселення</dt><dd>{{ profile.move_in_date|date:"d.m.Y"|default:"—" }}</dd>
+        <dt>Пошта</dt><dd>{{ user.email }} <span class="muted small">(бачите лише ви)</span></dd>
+      </dl>
+      {% if profile.about %}<p style="margin-top:1rem">{{ profile.about|linebreaksbr }}</p>{% endif %}
+    </div>
+    <div class="card">
+      <h2>Мої звички</h2>
+      <dl class="facts">
+        <dt>Режим сну</dt><dd>{{ lifestyle.get_sleep_schedule_display|default:"—" }}</dd>
+        <dt>Охайність</dt><dd>{{ lifestyle.cleanliness|default:"—" }}{% if lifestyle.cleanliness %} / 5{% endif %}</dd>
+        <dt>Шум</dt><dd>{{ lifestyle.noise_level|default:"—" }}{% if lifestyle.noise_level %} / 5{% endif %}</dd>
+        <dt>Гості</dt><dd>{{ lifestyle.get_guests_frequency_display|default:"—" }}</dd>
+        <dt>Куріння</dt><dd>{{ lifestyle.get_smoking_display|default:"—" }}</dd>
+        <dt>Тварини</dt><dd>{{ lifestyle.get_pets_display|default:"—" }}</dd>
+        <dt>Графік</dt><dd>{{ lifestyle.get_work_schedule_display|default:"—" }}</dd>
+        <dt>Обов’язки</dt><dd>{{ lifestyle.get_chores_attitude_display|default:"—" }}</dd>
+      </dl>
+    </div>
+  </div>
+  <div class="card">
+    <h2>Мої вимоги</h2>
+    <dl class="facts">
+      <dt>Місто / район</dt><dd>{{ search.city|default:"—" }}{% if search.district %}, {{ search.district }}{% endif %}</dd>
+      <dt>Бюджет</dt><dd>{% if search.budget_min or search.budget_max %}{{ search.budget_min|default:0 }}–{{ search.budget_max|default:"…" }} грн/міс.{% else %}—{% endif %}</dd>
+      <dt>Режим сну</dt><dd>{{ search.get_req_sleep_display }}</dd>
+      <dt>Охайність</dt><dd>{% if search.req_min_cleanliness %}не нижче {{ search.req_min_cleanliness }}{% else %}Неважливо{% endif %}</dd>
+      <dt>Шум</dt><dd>{% if search.req_max_noise %}не вище {{ search.req_max_noise }}{% else %}Неважливо{% endif %}</dd>
+      <dt>Гості</dt><dd>{{ search.get_req_guests_display }}</dd>
+      <dt>Куріння</dt><dd>{{ search.get_req_smoking_display }}</dd>
+      <dt>Тварини</dt><dd>{{ search.get_req_pets_display }}</dd>
+    </dl>
+  </div>
+</div></div>
+{% endblock %}

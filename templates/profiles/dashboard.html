@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Особистий кабінет — Roommate{% endblock %}
+{% block content %}
+<section class="banner"><div class="container"><div class="page-head"><div><h1>Вітаємо, {{ profile.display_name }}</h1><p class="muted" style="margin:.25rem 0 0">Тут зібрано все для пошуку співмешканця.</p></div>
+    <a class="btn btn-accent" href="{% url 'matching:recommendations' %}">{% include "components/icon.html" with name="users" %} Рекомендації</a></div></div></section>
+<div class="page"><div class="container">
+  
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>Готовність профілю: {{ percent }}%</h2>
+      <div class="progress" role="progressbar" aria-valuenow="{{ percent }}" aria-valuemin="0" aria-valuemax="100"><i style="width:{{ percent }}%"></i></div>
+      <ul class="steps">
+        {% for step in steps %}
+        <li>{% if step.done %}<span class="tag tag-good">{% include "components/icon.html" with name="check" %} Готово</span>{% else %}<span class="tag tag-warn">Потрібно</span>{% endif %}
+          <div style="flex:1"><strong>{{ step.title }}</strong><div class="muted small">{{ step.hint }}</div></div>
+          <a class="btn btn-secondary btn-sm" href="{% url step.url %}">{% if step.done %}Змінити{% else %}Заповнити{% endif %}</a></li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Швидкі дії</h2>
+      <div class="grid" style="gap:.6rem">
+        <a class="btn btn-secondary" href="{% url 'profiles:view' %}">{% include "components/icon.html" with name="user" %} Мій профіль</a>
+        <a class="btn btn-secondary" href="{% url 'interactions:list' %}">{% include "components/icon.html" with name="mail" %} Запити на контакт{% if pending_requests %} <span class="badge">{{ pending_requests }}</span>{% endif %}</a>
+        <a class="btn btn-secondary" href="{% url 'chat:list' %}">{% include "components/icon.html" with name="chat" %} Мої розмови</a>
+        <a class="btn btn-secondary" href="{% url 'housing:mine' %}">{% include "components/icon.html" with name="home" %} Мої оголошення ({{ my_listings }})</a>
+        <a class="btn btn-secondary" href="{% url 'accounts:settings' %}">{% include "components/icon.html" with name="lock" %} Налаштування акаунта</a>
+      </div>
+    </div>
+  </div>
+</div></div>
+{% endblock %}
