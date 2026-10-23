@@ -22,11 +22,22 @@
       <div class="card">
         <div class="cand-head">{% include "components/avatar.html" with profile=listing.owner.profile %}
           <div><div class="muted small">Власник оголошення</div><strong>{{ listing.owner.profile.display_name }}</strong></div></div>
+        {% if compat %}
+        <a class="compat-quick" href="{% url 'matching:candidate' listing.owner.profile.pk %}" title="Переглянути детальне пояснення сумісності">
+          {% if compat.score is not None %}
+            <span class="ring sm {{ compat.level }}" style="--p:{{ compat.score|floatformat:0 }}" aria-hidden="true"><span>{{ compat.score|floatformat:0 }}%</span></span>
+            <span class="compat-text"><strong>Сумісність: {{ compat.score|floatformat:0 }}%</strong>
+              <small>{% if compat.conflict %}Є критичний конфлікт{% elif compat.preliminary %}Попередня оцінка{% else %}Взаємна оцінка за анкетами{% endif %}</small></span>
+          {% else %}
+            <span class="compat-text"><strong>Сумісність: недостатньо даних</strong><small>Заповніть анкету, щоб побачити оцінку</small></span>
+          {% endif %}
+          <span class="compat-more">Детальніше {% include "components/icon.html" with name="arrow" %}</span>
+        </a>
+        {% endif %}
         <div class="btn-row" style="margin-top:1rem">
           {% if is_owner %}
             <a class="btn btn-primary" href="{% url 'housing:edit' listing.pk %}">Редагувати</a>
           {% else %}
-            <a class="btn btn-secondary" href="{% url 'matching:candidate' listing.owner.profile.pk %}">Сумісність із власником</a>
             {% if existing_request %}<span class="tag">{{ existing_request.get_status_display }}</span>
             {% else %}<a class="btn btn-primary" href="{% url 'interactions:send' listing.owner.pk %}?housing={{ listing.pk }}">{% include "components/icon.html" with name="mail" %} Надіслати запит</a>{% endif %}
             <a class="btn btn-ghost btn-sm" href="{% url 'interactions:report_listing' listing.pk %}">Поскаржитися</a>

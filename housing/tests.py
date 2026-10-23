@@ -1,3 +1,4 @@
+from datetime import date
 import io
 
 from django.contrib.auth import get_user_model
@@ -113,6 +114,53 @@ class HousingTests(TestCase):
         page = self.client.get(reverse("housing:detail", args=[HousingListing.objects.get().pk]))
         self.assertContains(page, "layout-main-side")
         self.assertNotContains(page, 'style="grid-template-columns')
+
+    def make_matching_pair(self):
+        from profiles.models import LifestylePreference, SearchPreference
+        for user in (self.owner, self.guest):
+            profile = user.profile
+            profile.city = "Львів"
+            profile.save()
+            LifestylePreference.objects.create(profile=profile, sleep_schedule="early", cleanliness=5, noise_level=2,
+                                               guests_frequency="sometimes", smoking="no", pets="none", chores_attitude="split")
+            SearchPreference.objects.create(profile=profile, city="Львів", district="Франківський", budget_min=5000, budget_max=8000,
+                                            move_in_date=date(2026, 11, 1), req_sleep="early", req_min_cleanliness=4, req_max_noise=3, req_smoking="no_inside")
+
+    def test_detail_shows_quick_compatibility_with_owner_and_link_to_details(self):
+        self.make_matching_pair()
+        self.create()
+        listing = HousingListing.objects.get()
+        self.client.force_login(self.guest)
+        page = self.client.get(reverse("housing:detail", args=[listing.pk]))
+        self.assertContains(page, "Сумісність: 100%")
+        self.assertContains(page, "Детальніше")
+        self.assertContains(page, reverse("matching:candidate", args=[self.owner.profile.pk]))
+        self.assertNotContains(page, "Сумісність із власником")
+        # коротке число збігається з детальною сторінкою
+        detail = self.client.get(reverse("matching:candidate", args=[self.owner.profile.pk]))
+        self.assertEqual(page.context["compat"]["score"], detail.context["outcome"].score)
+
+    def test_quick_compatibility_without_data_and_for_owner_and_blocked(self):
+        from interactions.models import UserBlock
+        self.create()
+        listing = HousingListing.objects.get()
+        url = reverse("housing:detail", args=[listing.pk])
+        self.assertNotContains(self.client.get(url), "Сумісність:")  # власник бачить своє оголошення без блоку
+        self.client.force_login(self.guest)
+        self.assertContains(self.client.get(url), "Сумісність: недостатньо даних")
+        UserBlock.objects.create(blocker=self.owner, blocked=self.guest)
+        self.assertNotContains(self.client.get(url), "Сумісність:")
+
+    def test_quick_compatibility_marks_critical_conflict(self):
+        from profiles.models import CriterionWeight, LifestylePreference
+        self.make_matching_pair()
+        LifestylePreference.objects.filter(profile=self.owner.profile).update(smoking="inside")
+        CriterionWeight.objects.create(profile=self.guest.profile, criterion="smoking", weight=5, is_critical=True)
+        self.create()
+        self.client.force_login(self.guest)
+        page = self.client.get(reverse("housing:detail", args=[HousingListing.objects.get().pk]))
+        self.assertContains(page, "Є критичний конфлікт")
+        self.assertTrue(page.context["compat"]["conflict"])
 
     def test_only_owner_can_edit_delete_toggle(self):
         self.create()

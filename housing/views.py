@@ -6,6 +6,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_POST
 
 from interactions.models import ContactRequest, is_blocked_between
+from matching import services
 
 from .forms import ListingFilterForm, ListingForm
 from .models import HousingListing, HousingPhoto
@@ -25,6 +26,16 @@ def _can_see_address(user, listing):
         return False
     return ContactRequest.objects.filter(status=ContactRequest.Status.ACCEPTED).filter(
         Q(sender=user, receiver=listing.owner) | Q(sender=listing.owner, receiver=user)).exists()
+
+
+def _owner_compatibility(user, listing, is_owner):
+    """Короткий результат сумісності з власником (той самий алгоритм, що й на сторінці кандидата)."""
+    if is_owner or is_blocked_between(user, listing.owner):
+        return None
+    outcome = services.get_match(user, listing.owner.profile)
+    score = outcome.score
+    level = "" if score is None or score >= 75 else "mid" if score >= 50 else "low"
+    return {"score": score, "level": level, "conflict": outcome.has_critical_conflict, "preliminary": outcome.is_preliminary}
 
 
 @login_required
@@ -63,7 +74,7 @@ def listing_detail(request, housing_id):
         status__in=[ContactRequest.Status.PENDING, ContactRequest.Status.ACCEPTED]).first()
     return render(request, "housing/detail.html", {
         "listing": listing, "is_owner": is_owner, "show_address": _can_see_address(request.user, listing),
-        "existing_request": existing})
+        "existing_request": existing, "compat": _owner_compatibility(request.user, listing, is_owner)})
 
 
 @login_required

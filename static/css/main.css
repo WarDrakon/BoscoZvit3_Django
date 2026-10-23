@@ -181,6 +181,7 @@ legend{font-weight:690;font-size:1.15rem;margin-bottom:.9rem;padding:0}
 .ring{--p:0;width:66px;height:66px;border-radius:50%;background:conic-gradient(var(--c,var(--violet)) calc(var(--p)*1%),#ECE8F7 0);display:grid;place-items:center;flex:none;animation:pop .6s var(--ease) both}
 .ring span{width:52px;height:52px;border-radius:50%;background:var(--paper);display:grid;place-items:center;font-weight:740;font-size:.95rem}
 .ring.lg{width:128px;height:128px}.ring.lg span{width:102px;height:102px;font-size:1.85rem}
+.ring.sm{width:50px;height:50px;animation:none}.ring.sm span{width:40px;height:40px;font-size:.78rem}
 .ring.mid{--c:#F29A12}.ring.low{--c:var(--coral)}
 .points{list-style:none;margin:0;padding:0;display:grid;gap:.4rem;font-size:.92rem}
 .points li{display:flex;gap:.55rem;align-items:flex-start}
@@ -238,6 +239,15 @@ dl.facts dt{color:var(--muted)}dl.facts dd{margin:0;font-weight:570}
 .gallery a{overflow:hidden;border-radius:14px;display:block}
 .gallery img{aspect-ratio:4/3;object-fit:cover;width:100%;transition:transform .5s var(--ease)}
 .gallery a:hover img{transform:scale(1.07)}
+
+.compat-quick{display:flex;align-items:center;gap:.85rem;margin-top:1.1rem;padding:.85rem 1rem;border:1px solid var(--line-2);border-radius:14px;background:var(--violet-l);color:var(--ink);text-decoration:none;transition:transform .2s var(--ease),box-shadow .2s,border-color .2s}
+.compat-quick:hover{transform:translateY(-2px);box-shadow:var(--sh-2);border-color:var(--violet);color:var(--ink)}
+.compat-text{display:flex;flex-direction:column;line-height:1.3;min-width:0}
+.compat-text small{color:var(--muted);font-size:.8rem}
+.compat-more{margin-left:auto;display:inline-flex;align-items:center;gap:.3rem;font-weight:650;font-size:.88rem;color:var(--violet-d);white-space:nowrap}
+.compat-quick:hover .compat-more .icon{transform:translateX(3px)}
+.compat-more .icon{transition:transform .2s var(--ease)}
+@media(max-width:420px){.compat-quick{flex-wrap:wrap}.compat-more{margin-left:0;width:100%}}
 
 /* Запити, чат */
 .row-item{display:flex;gap:1rem;align-items:center;padding:1.1rem .6rem;margin:0 -.6rem;border-bottom:1px solid var(--line);flex-wrap:wrap;border-radius:12px;transition:background .2s}
