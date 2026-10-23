@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}{{ listing.title }} — Roommate{% endblock %}
+{% block content %}
+<div class="page"><div class="container">
+  <div class="page-head"><div><h1>{{ listing.title }}</h1>
+    <div class="muted">{% include "components/icon.html" with name="pin" %} {{ listing.city }}{% if listing.district %}, {{ listing.district }}{% endif %}</div></div>
+    <div class="price" style="font-size:1.6rem">{{ listing.price_per_person }} грн <span class="muted small" style="font-weight:400">/ особа / міс.</span></div></div>
+  {% if not listing.is_public %}<div class="notice notice-warn">Це оголошення не бачать інші користувачі{% if listing.is_hidden %}: його приховано модератором{% else %}: воно деактивоване{% endif %}.</div>{% endif %}
+  <div class="grid layout-main-side">
+    <div>
+      <div class="card">
+        {% if listing.photos.all %}<div class="gallery">{% for p in listing.photos.all %}<a href="{{ p.image.url }}" target="_blank" rel="noopener"><img src="{{ p.image.url }}" alt="Фото житла {{ forloop.counter }}" loading="lazy"></a>{% endfor %}</div>
+        {% else %}<p class="muted" style="margin:0">Фотографій поки немає.</p>{% endif %}
+      </div>
+      <div class="card"><h2>Опис</h2><p>{{ listing.description|linebreaksbr }}</p></div>
+    </div>
+    <div>
+      <div class="card">
+        <dl class="facts"><dt>Кімнат</dt><dd>{{ listing.rooms }}</dd><dt>Вільних місць</dt><dd>{{ listing.free_places }}</dd>
+          <dt>Адреса</dt><dd>{% if show_address and listing.address %}{{ listing.address }}{% elif show_address %}не вказана{% else %}Приховано до прийняття запиту{% endif %}</dd></dl>
+      </div>
+      <div class="card">
+        <div class="cand-head">{% include "components/avatar.html" with profile=listing.owner.profile %}
+          <div><div class="muted small">Власник оголошення</div><strong>{{ listing.owner.profile.display_name }}</strong></div></div>
+        <div class="btn-row" style="margin-top:1rem">
+          {% if is_owner %}
+            <a class="btn btn-primary" href="{% url 'housing:edit' listing.pk %}">Редагувати</a>
+          {% else %}
+            <a class="btn btn-secondary" href="{% url 'matching:candidate' listing.owner.profile.pk %}">Сумісність із власником</a>
+            {% if existing_request %}<span class="tag">{{ existing_request.get_status_display }}</span>
+            {% else %}<a class="btn btn-primary" href="{% url 'interactions:send' listing.owner.pk %}?housing={{ listing.pk }}">{% include "components/icon.html" with name="mail" %} Надіслати запит</a>{% endif %}
+            <a class="btn btn-ghost btn-sm" href="{% url 'interactions:report_listing' listing.pk %}">Поскаржитися</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div></div>
+{% endblock %}

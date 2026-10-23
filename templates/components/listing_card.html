@@ -1,0 +1,11 @@
+<article class="card listing">
+  <a href="{% url 'housing:detail' l.pk %}" aria-label="{{ l.title }}">
+  {% with photo=l.photos.all.0 %}{% if photo %}<img class="listing-img" src="{{ photo.image.url }}" alt="Фото житла: {{ l.title }}" loading="lazy">{% else %}<div class="listing-img">{% include "components/icon.html" with name="home" %}</div>{% endif %}{% endwith %}</a>
+  <div class="listing-body">
+    <div class="price">{{ l.price_per_person }} грн <span class="muted small" style="font-weight:400">/ особа / міс.</span></div>
+    <h3 style="margin:0"><a href="{% url 'housing:detail' l.pk %}" style="color:inherit;text-decoration:none">{{ l.title }}</a></h3>
+    <div class="muted small">{% include "components/icon.html" with name="pin" %} {{ l.city }}{% if l.district %}, {{ l.district }}{% endif %}</div>
+    <div class="tags"><span class="tag">Кімнат: {{ l.rooms }}</span><span class="tag">Вільних місць: {{ l.free_places }}</span>
+      {% if not l.is_active %}<span class="tag tag-warn">Неактивне</span>{% endif %}{% if l.is_hidden %}<span class="tag tag-bad">Приховано модератором</span>{% endif %}</div>
+  </div>
+</article>

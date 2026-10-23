@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% block title %}Оголошення про житло — Roommate{% endblock %}
+{% block content %}
+<section class="banner"><div class="container"><div class="page-head"><h1>Оголошення про житло</h1>
+    <div class="btn-row"><a class="btn btn-light" href="{% url 'housing:mine' %}">Мої оголошення</a><a class="btn btn-accent" href="{% url 'housing:create' %}">{% include "components/icon.html" with name="plus" %} Додати оголошення</a></div></div></div></section>
+<div class="page"><div class="container">
+  
+  <form method="get" class="card" style="margin-bottom:1.5rem"><div class="filters">
+    {% for field in form %}{% include "components/field.html" %}{% endfor %}
+    <div class="field"><button class="btn btn-primary" type="submit" style="width:100%">Шукати</button></div></div></form>
+  {% if page.object_list %}
+    <div class="grid grid-3">{% for l in page %}{% include "components/listing_card.html" %}{% endfor %}</div>
+    {% include "components/pagination.html" %}
+  {% else %}
+    <div class="card empty"><h3>Оголошень не знайдено</h3><p>Спробуйте змінити фільтри або додайте власне оголошення.</p></div>
+  {% endif %}
+</div></div>
+{% endblock %}

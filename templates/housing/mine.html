@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}Мої оголошення — Roommate{% endblock %}
+{% block content %}
+<section class="banner"><div class="container"><div class="page-head"><h1>Мої оголошення</h1><a class="btn btn-accent" href="{% url 'housing:create' %}">{% include "components/icon.html" with name="plus" %} Нове оголошення</a></div></div></section>
+<div class="page"><div class="container">
+  
+  {% if listings %}
+    <div class="grid grid-3">{% for l in listings %}
+      <div>{% include "components/listing_card.html" %}
+        <div class="btn-row" style="margin-top:.6rem">
+          <a class="btn btn-secondary btn-sm" href="{% url 'housing:edit' l.pk %}">Редагувати</a>
+          <form class="inline" method="post" action="{% url 'housing:toggle' l.pk %}">{% csrf_token %}<button class="btn btn-secondary btn-sm" type="submit">{% if l.is_active %}Деактивувати{% else %}Активувати{% endif %}</button></form>
+          <a class="btn btn-ghost btn-sm" href="{% url 'housing:delete' l.pk %}">Видалити</a>
+        </div></div>{% endfor %}</div>
+  {% else %}
+    <div class="card empty"><h3>У вас ще немає оголошень</h3><p>Створіть оголошення, якщо маєте житло й шукаєте співмешканця.</p><a class="btn btn-primary" href="{% url 'housing:create' %}">Створити оголошення</a></div>
+  {% endif %}
+</div></div>
+{% endblock %}

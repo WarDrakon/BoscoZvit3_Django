@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% block title %}{{ title }} — Roommate{% endblock %}
+{% block content %}
+<div class="page"><div class="narrow">
+  <div class="page-head"><h1>{{ title }}</h1></div>
+  <div class="card">
+    <form method="post" enctype="multipart/form-data" novalidate data-loading>
+      {% csrf_token %}{% include "components/form_fields.html" %}
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Зберегти</button><a class="btn btn-secondary" href="{% url 'housing:mine' %}">Скасувати</a></div>
+    </form>
+  </div>
+  {% if listing and listing.photos.all %}
+  <div class="card"><h2>Поточні фотографії</h2>
+    <div class="gallery">{% for p in listing.photos.all %}
+      <div><img src="{{ p.image.url }}" alt="Фото {{ forloop.counter }}" loading="lazy">
+        <form method="post" action="{% url 'housing:photo_delete' p.pk %}" data-confirm="Видалити це фото?" style="margin-top:.35rem">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">Видалити</button></form></div>{% endfor %}</div></div>
+  {% endif %}
+</div></div>
+{% endblock %}
