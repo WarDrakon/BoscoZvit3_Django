@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+{% block title %}Рекомендації — Roommate{% endblock %}
+{% block content %}
+<section class="banner"><div class="container"><div class="page-head"><div><h1>Рекомендовані співмешканці</h1>
+    <p class="muted" style="margin:.25rem 0 0">Відсортовано за взаємною сумісністю. Знайдено: <strong>{{ found_total }}</strong>{% if conflicted %} (з них із критичними конфліктами: {{ conflicted|length }}){% endif %}.</p></div>
+    <a class="btn btn-light" href="{% url 'profiles:search' %}">{% include "components/icon.html" with name="sliders" %} Параметри та ваги</a></div></div></section>
+<div class="page"><div class="container">
+  
+
+  <form method="get" autocomplete="off" class="card" style="margin-bottom:1.5rem"><div class="filters">
+    {% for field in form %}{% include "components/field.html" %}{% endfor %}
+    <div class="field"><button class="btn btn-primary" type="submit" style="width:100%">Застосувати</button></div></div></form>
+
+  {% if invalid_filters %}
+    <div class="notice notice-warn" role="alert">{% include "components/icon.html" with name="alert" %} Не застосовано через помилку в полі: {{ invalid_filters|join:", " }}. Решту фільтрів, зокрема «Показувати кандидатів із критичними конфліктами», застосовано.</div>
+  {% endif %}
+
+  {% if page.object_list %}
+    <div class="grid grid-3">{% for profile, outcome in page %}{% include "components/candidate_card.html" %}{% endfor %}</div>
+    {% include "components/pagination.html" %}
+  {% elif conflicted %}
+    <div class="notice notice-info">Кандидатів без критичних конфліктів немає. Нижче — кандидати з критичними конфліктами.</div>
+  {% endif %}
+
+  {% if found_total == 0 %}
+    <div class="card empty"><h3>Підходящих кандидатів поки немає</h3>
+      {% if empty_reason %}<p>{{ empty_reason }}</p>{% endif %}
+      <p>Спробуйте послабити фільтри, вказати «Неважливо» для частини вимог або перевірте параметри пошуку.</p>
+      <div class="btn-row" style="justify-content:center">
+        {% if hidden_conflicts %}<a class="btn btn-primary" href="?{{ show_conflicts_query }}">Показати кандидатів із конфліктами</a>{% endif %}
+        <a class="btn btn-secondary" href="{% url 'profiles:search' %}">Змінити параметри пошуку</a></div></div>
+  {% endif %}
+
+  {% if hidden_conflicts and found_total > 0 %}
+    <div class="notice notice-warn" style="margin-top:1.5rem">{% include "components/icon.html" with name="alert" %} Ще {{ hidden_conflicts }} кандидат(ів) приховано через критичні конфлікти. <a href="?{{ show_conflicts_query }}">Показати їх</a>.</div>
+  {% endif %}
+
+  {% if conflicted %}
+    <h2 style="margin-top:2rem">З критичними конфліктами ({{ conflicted|length }})</h2>
+    <div class="notice notice-bad">Ці кандидати порушують вашу критичну вимогу або ви порушуєте їхню. Ми не рекомендуємо їх, але рішення за вами.</div>
+    <div class="grid grid-3">{% for profile, outcome in conflicted %}{% include "components/candidate_card.html" %}{% endfor %}</div>
+  {% endif %}
+</div></div>
+{% endblock %}

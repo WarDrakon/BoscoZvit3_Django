@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block title %}{{ profile.display_name }} — Roommate{% endblock %}
+{% block content %}
+<div class="page"><div class="container">
+  <p><a href="{% url 'matching:recommendations' %}">← До рекомендацій</a></p>
+  <div class="card">
+    <div class="cand-head" style="gap:1.25rem;flex-wrap:wrap">
+      {% include "components/avatar.html" with large=True %}
+      <div style="flex:1;min-width:220px"><h1 style="margin:0">{{ profile.display_name }}</h1>
+        <div class="muted">{{ profile.city|default:"Місто не вказано" }}{% if profile.occupation %} · {{ profile.occupation }}{% endif %}</div>
+        <div class="tags" style="margin-top:.5rem"><span class="tag">{{ profile.get_search_mode_display }}</span>
+          {% if listings %}<span class="tag tag-good">Має житло</span>{% endif %}
+          {% if profile.move_in_date %}<span class="tag">Заселення: {{ profile.move_in_date|date:"d.m.Y" }}</span>{% endif %}</div></div>
+      <div class="btn-row">
+        {% if existing_request and existing_request.status == 'accepted' %}<a class="btn btn-primary" href="{% url 'chat:list' %}">{% include "components/icon.html" with name="chat" %} Перейти до чату</a>
+        {% elif existing_request %}<span class="tag tag-warn">Запит очікує відповіді</span>
+        {% elif incoming_request %}<a class="btn btn-primary" href="{% url 'interactions:list' %}">Цей користувач надіслав вам запит</a>
+        {% else %}<a class="btn btn-primary" href="{% url 'interactions:send' profile.user_id %}">{% include "components/icon.html" with name="mail" %} Надіслати запит</a>{% endif %}
+        <form class="inline" method="post" action="{% url 'interactions:block' profile.user_id %}" data-confirm="Заблокувати цього користувача?">{% csrf_token %}<button class="btn btn-ghost btn-sm" type="submit">Заблокувати</button></form>
+        <a class="btn btn-ghost btn-sm" href="{% url 'interactions:report_user' profile.user_id %}">Поскаржитися</a>
+      </div>
+    </div>
+    {% if profile.about %}<p style="margin-top:1.25rem;margin-bottom:0">{{ profile.about|linebreaksbr }}</p>{% endif %}
+  </div>
+
+  <div class="card">
+    <div class="score" style="gap:1.5rem;flex-wrap:wrap">
+      {% if outcome.score is not None %}
+        <div class="ring lg {% if outcome.score >= 75 %}{% elif outcome.score >= 50 %}mid{% else %}low{% endif %}" style="--p:{{ outcome.score|floatformat:0 }}" role="img" aria-label="Сумісність {{ outcome.score|floatformat:0 }} відсотків"><span>{{ outcome.score|floatformat:0 }}%</span></div>
+        <div style="flex:1;min-width:240px"><h2 style="margin-bottom:.3rem">Взаємна сумісність</h2>
+          <p class="muted" style="margin:0">Ваші вимоги виконано на {{ outcome.score_ab|default_if_none:"—"|floatformat:0 }}%, вимоги кандидата — на {{ outcome.score_ba|default_if_none:"—"|floatformat:0 }}%. Повнота даних: {{ outcome.coverage|default_if_none:"—" }}%.</p></div>
+      {% else %}
+        <div><h2>Недостатньо даних для оцінки</h2><p class="muted" style="margin:0">Ні ви, ні кандидат не заповнили достатньо критеріїв. Уточніть анкету й параметри пошуку.</p></div>
+      {% endif %}
+    </div>
+    {% if outcome.is_preliminary and outcome.score is not None %}<div class="notice notice-warn" style="margin:1rem 0 0">Це попередня оцінка: частину критеріїв неможливо порівняти через незаповнені дані.</div>{% endif %}
+  </div>
+
+  {% if outcome.critical_conflicts %}
+  <div class="notice notice-bad" role="alert"><strong>{% include "components/icon.html" with name="alert" %} Критичний конфлікт</strong>
+    <ul class="points" style="margin-top:.5rem">{% for c in outcome.critical_conflicts %}<li>{{ c }}</li>{% endfor %}</ul></div>
+  {% endif %}
+
+  <div class="grid grid-2">
+    <div class="card"><h2>Сильні сторони</h2>
+      <ul class="points">{% for t in outcome.strengths %}<li class="ok">{% include "components/icon.html" with name="check" %}<span>{{ t }}</span></li>{% empty %}<li class="muted">Явних збігів не виявлено.</li>{% endfor %}</ul></div>
+    <div class="card"><h2>Можливі конфлікти</h2>
+      <ul class="points">{% for t in outcome.concerns %}<li class="no">{% include "components/icon.html" with name="alert" %}<span>{{ t }}</span></li>{% empty %}<li class="muted">Суттєвих розбіжностей не виявлено.</li>{% endfor %}</ul></div>
+  </div>
+
+  <div class="card"><h2>Розрахунок за критеріями</h2>
+    <div style="overflow-x:auto"><table class="crit">
+      <thead><tr><th scope="col">Критерій</th><th scope="col">Відповідність</th><th scope="col" class="num hide-s">Ваші вимоги</th><th scope="col" class="num hide-s">Вимоги кандидата</th><th scope="col" class="num hide-s">Вага (ви / кандидат)</th></tr></thead>
+      <tbody>{% for row in outcome.rows %}
+        <tr><th scope="row" style="font-weight:500">{{ row.label }}</th>
+          <td>{% if row.combined is not None %}<div class="bar {% if row.status == 'mid' %}mid{% elif row.status == 'bad' %}bad{% endif %}"><i style="width:{% widthratio row.combined 1 100 %}%"></i></div>{% else %}<span class="muted small">не враховано</span>{% endif %}</td>
+          <td class="num hide-s">{% if row.you_to_candidate is not None %}{% widthratio row.you_to_candidate 1 100 %}%{% else %}—{% endif %}</td>
+          <td class="num hide-s">{% if row.candidate_to_you is not None %}{% widthratio row.candidate_to_you 1 100 %}%{% else %}—{% endif %}</td>
+          <td class="num hide-s">{{ row.weight_you }} / {{ row.weight_candidate }}</td></tr>{% endfor %}</tbody></table></div>
+    <p class="muted small" style="margin-top:1rem">Підсумок = 0,6 × середнє двох напрямків + 0,4 × менше з двох. Критерії з відповіддю «Неважливо» або без даних не враховуються. Це допоміжна оцінка на основі анкет, а не гарантія сумісності: остаточне рішення за вами.</p>
+  </div>
+
+  <div class="grid grid-2">
+    <div class="card"><h2>Побутові звички</h2>
+      {% if lifestyle %}<dl class="facts">
+        <dt>Режим сну</dt><dd>{{ lifestyle.get_sleep_schedule_display|default:"—" }}</dd>
+        <dt>Охайність</dt><dd>{{ lifestyle.cleanliness|default:"—" }}</dd>
+        <dt>Шум</dt><dd>{{ lifestyle.noise_level|default:"—" }}</dd>
+        <dt>Гості</dt><dd>{{ lifestyle.get_guests_frequency_display|default:"—" }}</dd>
+        <dt>Куріння</dt><dd>{{ lifestyle.get_smoking_display|default:"—" }}</dd>
+        <dt>Тварини</dt><dd>{{ lifestyle.get_pets_display|default:"—" }}</dd>
+        <dt>Графік</dt><dd>{{ lifestyle.get_work_schedule_display|default:"—" }}</dd>
+        <dt>Обов’язки</dt><dd>{{ lifestyle.get_chores_attitude_display|default:"—" }}</dd></dl>
+      {% else %}<p class="muted">Анкету не заповнено.</p>{% endif %}</div>
+    <div class="card"><h2>Бюджет і пошук</h2>
+      <dl class="facts"><dt>Бюджет</dt><dd>{% if search.budget_min or search.budget_max %}{{ search.budget_min|default:0 }}–{{ search.budget_max|default:"…" }} грн/міс.{% else %}—{% endif %}</dd>
+      <dt>Район</dt><dd>{{ search.district|default:"—" }}</dd></dl>
+      {% for l in listings %}<hr style="border:0;border-top:1px solid var(--line);margin:1rem 0"><strong>Житло:</strong> <a href="{% url 'housing:detail' l.pk %}">{{ l.title }}</a> — {{ l.price_per_person }} грн/особа{% endfor %}</div>
+  </div>
+</div></div>
+{% endblock %}

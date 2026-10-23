@@ -1,0 +1,29 @@
+<article class="card cand">
+  <div class="cand-head">
+    {% include "components/avatar.html" %}
+    <div>
+      <h3 class="cand-name"><a href="{% url 'matching:candidate' profile.pk %}" style="color:inherit;text-decoration:none">{{ profile.display_name }}</a></h3>
+      <div class="muted small">{{ profile.city|default:"Місто не вказано" }}{% if profile.occupation %} · {{ profile.occupation }}{% endif %}</div>
+    </div>
+  </div>
+  <div class="tags">
+    {% if profile.active_listing %}<span class="tag tag-good">{% include "components/icon.html" with name="home" %} Має житло</span>{% endif %}
+    {% if profile.search_mode == 'joint' %}<span class="tag">Шукає спільну оренду</span>{% else %}<span class="tag">Шукає співмешканця в житло</span>{% endif %}
+    {% if outcome.has_critical_conflict %}<span class="tag tag-bad">Критичний конфлікт</span>{% endif %}
+  </div>
+  <div class="score">
+    {% if outcome.score is not None %}
+      <div class="ring {% if outcome.score >= 75 %}{% elif outcome.score >= 50 %}mid{% else %}low{% endif %}" style="--p:{{ outcome.score|floatformat:0 }}" role="img" aria-label="Сумісність {{ outcome.score|floatformat:0 }} відсотків"><span>{{ outcome.score|floatformat:0 }}%</span></div>
+      <div class="small"><strong>Сумісність</strong>{% if outcome.is_preliminary %}<br><span class="tag tag-warn">Попередня оцінка</span>{% endif %}</div>
+    {% else %}
+      <div class="ring" style="--p:0"><span>—</span></div>
+      <div class="small"><strong>Недостатньо даних</strong><br><span class="muted">Заповніть анкету, щоб побачити оцінку</span></div>
+    {% endif %}
+  </div>
+  <ul class="points">
+    {% for text in outcome.strengths|slice:":2" %}<li class="ok">{% include "components/icon.html" with name="check" %}<span>{{ text }}</span></li>{% endfor %}
+    {% for text in outcome.critical_conflicts|slice:":1" %}<li class="no">{% include "components/icon.html" with name="alert" %}<span>{{ text }}</span></li>
+    {% empty %}{% for text in outcome.concerns|slice:":1" %}<li class="no">{% include "components/icon.html" with name="alert" %}<span>{{ text }}</span></li>{% endfor %}{% endfor %}
+  </ul>
+  <div class="cand-foot"><a class="btn btn-secondary btn-sm" href="{% url 'matching:candidate' profile.pk %}">Детальний розрахунок</a></div>
+</article>
