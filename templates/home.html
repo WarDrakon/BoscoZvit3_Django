@@ -22,19 +22,28 @@
       </ul>
     </div>
     <div class="stage" aria-label="Приклад пояснення сумісності">
-      <div class="card demo">
-        <div class="demo-top">
-          <div class="cand-head"><span class="avatar" aria-hidden="true">А</span><div><div class="cand-name">Андрій</div><div class="muted small">Львів · студент</div></div></div>
-          <div class="ring" style="--p:89"><span>89%</span></div>
+      <div class="card demo" id="demo-card">
+        <div class="demo-body">
+          <div class="demo-top">
+            <div class="cand-head"><span class="avatar" id="demo-avatar" aria-hidden="true">А</span><div><div class="cand-name" id="demo-name">Андрій</div><div class="muted small" id="demo-meta">Львів · студент</div></div></div>
+            <div class="ring" id="demo-ring" style="--p:89"><span id="demo-score">89%</span></div>
+          </div>
+          <div class="demo-row"><span data-label>Бюджет</span><div class="bar"><i data-bar style="width:95%"></i></div><b data-value>95%</b></div>
+          <div class="demo-row"><span data-label>Чистота</span><div class="bar"><i data-bar style="width:100%"></i></div><b data-value>100%</b></div>
+          <div class="demo-row"><span data-label>Режим сну</span><div class="bar"><i data-bar style="width:85%"></i></div><b data-value>85%</b></div>
+          <div class="demo-row"><span data-label>Гості</span><div class="bar bad"><i data-bar style="width:40%"></i></div><b data-value>40%</b></div>
         </div>
-        <div class="demo-row"><span>Бюджет</span><div class="bar"><i style="width:95%"></i></div><b>95%</b></div>
-        <div class="demo-row"><span>Чистота</span><div class="bar"><i style="width:100%"></i></div><b>100%</b></div>
-        <div class="demo-row"><span>Режим сну</span><div class="bar"><i style="width:85%"></i></div><b>85%</b></div>
-        <div class="demo-row"><span>Гості</span><div class="bar bad"><i style="width:40%"></i></div><b>40%</b></div>
         <p class="demo-note">Приклад формату результату. Реальні дані залежать від ваших анкет.</p>
+        <div class="demo-dots" id="demo-dots" role="group" aria-label="Приклади результатів"></div>
       </div>
       <div class="float b">{% include "components/icon.html" with name="shield" %} Критичні вимоги перевіряються першими</div>
-      <div class="float a">{% include "components/icon.html" with name="home" %} Є житло · Франківський · 6500 грн</div>
+      <div class="float a" id="demo-note">{% include "components/icon.html" with name="home" %} <span>Є житло · Франківський · 6500 грн</span></div>
+      <script type="application/json" id="demo-variants">[
+        {"initial":"А","name":"Андрій","meta":"Львів · студент","score":89,"grad":["#C9BEFF","#FFC9B8"],"rows":[["Бюджет",95],["Чистота",100],["Режим сну",85],["Гості",40]],"note":"Є житло · Франківський · 6500 грн"},
+        {"initial":"О","name":"Олена","meta":"Київ · дизайнерка","score":76,"grad":["#FFD9A0","#FF9E86"],"rows":[["Бюджет",70],["Чистота",92],["Режим сну",62],["Гості",88]],"note":"Критичних конфліктів немає"},
+        {"initial":"М","name":"Максим","meta":"Одеса · інженер","score":58,"grad":["#A8E6CF","#8FD3FF"],"rows":[["Бюджет",82],["Чистота",45],["Режим сну",55],["Гості",72]],"note":"Різний рівень чистоти"},
+        {"initial":"С","name":"Софія","meta":"Дніпро · маркетологиня","score":93,"grad":["#D5C4FF","#9EC5FF"],"rows":[["Бюджет",96],["Чистота",98],["Режим сну",90],["Гості",86]],"note":"Збігається режим сну"}
+      ]</script>
     </div>
   </div>
 </section>

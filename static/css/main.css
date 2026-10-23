@@ -290,7 +290,15 @@ dl.facts dt{color:var(--muted)}dl.facts dd{margin:0;font-weight:570}
 .hero-points li{display:flex;gap:.45rem;align-items:center}
 .hero-points .icon{color:#5BD6B0}
 .stage{position:relative;padding:1.4rem 0 1.6rem;animation:rise .9s .2s var(--ease) both}
-.demo{padding:1.6rem;border-radius:var(--r-l);box-shadow:var(--sh-3);border:0;transform:rotate(-1.2deg);transition:transform .5s var(--ease)}
+.demo{padding:1.6rem;border-radius:var(--r-l);box-shadow:var(--sh-3);border:0;transform:rotate(-1.2deg);transition:transform .5s var(--ease),opacity .25s;color:var(--ink)}
+.demo .muted{color:var(--muted)}
+.demo.fading .demo-body{opacity:0;transform:translateY(6px)}
+.demo-body{transition:opacity .25s,transform .25s}
+.demo-dots{display:flex;gap:.4rem;justify-content:center;margin-top:1rem}
+.demo-dots button{width:10px;height:10px;padding:0;border-radius:50%;border:0;background:#CFC7E4;cursor:pointer;transition:background .2s,transform .2s;position:relative}
+.demo-dots button::after{content:"";position:absolute;inset:-9px}
+.demo-dots button:hover{background:#A99BDB}
+.demo-dots button[aria-pressed="true"]{background:var(--violet);transform:scale(1.25)}
 .demo:hover{transform:rotate(0) translateY(-4px)}
 .demo-top{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1.15rem}
 .demo-row{display:grid;grid-template-columns:110px 1fr 44px;gap:.75rem;align-items:center;font-size:.92rem;margin:.7rem 0}

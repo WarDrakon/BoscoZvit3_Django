@@ -47,4 +47,64 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!window.confirm(form.dataset.confirm)) e.preventDefault();
     });
   });
+  initDemoCard();
 });
+
+// Hero: кілька прикладів результату змінюються по колу. Перший приклад уже відрендерено на сервері (SSR),
+// тож без JS сторінка повна; при prefers-reduced-motion автоматичної зміни немає, лишаються кнопки-крапки.
+function initDemoCard() {
+  const card = document.getElementById("demo-card");
+  const raw = document.getElementById("demo-variants");
+  if (!card || !raw || card.dataset.ready) return;
+  card.dataset.ready = "1"; // повторна ініціалізація не дублює крапки й таймер
+  let variants;
+  try { variants = JSON.parse(raw.textContent); } catch (e) { return; }
+  if (!Array.isArray(variants) || variants.length < 2) return;
+  const $ = (id) => document.getElementById(id);
+  const rows = card.querySelectorAll(".demo-row");
+  const dots = $("demo-dots");
+  const reduce = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+  let index = 0, timer = null, userPicked = false;
+
+  const level = (n) => (n >= 75 ? "" : n >= 50 ? "mid" : "bad");
+  function render(v) {
+    $("demo-avatar").textContent = v.initial;
+    $("demo-avatar").style.background = `linear-gradient(135deg, ${v.grad[0]}, ${v.grad[1]})`;
+    $("demo-name").textContent = v.name;
+    $("demo-meta").textContent = v.meta;
+    $("demo-score").textContent = `${v.score}%`;
+    const ring = $("demo-ring");
+    ring.style.setProperty("--p", v.score);
+    ring.classList.toggle("mid", v.score < 75 && v.score >= 50);
+    ring.classList.toggle("low", v.score < 50);
+    v.rows.forEach(([label, value], i) => {
+      const row = rows[i]; if (!row) return;
+      row.querySelector("[data-label]").textContent = label;
+      row.querySelector("[data-value]").textContent = `${value}%`;
+      const bar = row.querySelector(".bar"), fill = row.querySelector("[data-bar]");
+      bar.className = `bar ${level(value)}`.trim();
+      fill.style.animation = "none"; fill.style.width = `${value}%`; void fill.offsetWidth; fill.style.animation = "";
+    });
+    $("demo-note").lastElementChild.textContent = v.note;
+    dots.querySelectorAll("button").forEach((b, i) => b.setAttribute("aria-pressed", String(i === index)));
+  }
+  function show(i, instant) {
+    index = (i + variants.length) % variants.length;
+    if (instant || reduce) { render(variants[index]); return; }
+    card.classList.add("fading");
+    setTimeout(() => { render(variants[index]); card.classList.remove("fading"); }, 240);
+  }
+  variants.forEach((v, i) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.setAttribute("aria-label", `Показати приклад: ${v.name}`);
+    b.setAttribute("aria-pressed", String(i === 0));
+    b.addEventListener("click", () => { userPicked = true; stop(); show(i); });
+    dots.appendChild(b);
+  });
+  function start() { if (!reduce && !userPicked && !timer) timer = setInterval(() => show(index + 1), 5500); }
+  function stop() { clearInterval(timer); timer = null; }
+  card.addEventListener("mouseenter", stop); card.addEventListener("mouseleave", start);
+  card.addEventListener("focusin", stop); card.addEventListener("focusout", start);
+  document.addEventListener("visibilitychange", () => (document.hidden ? stop() : start()));
+  start();
+}

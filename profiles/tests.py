@@ -172,3 +172,49 @@ class SeedDemoTests(TestCase):
         pending = ContactRequest.objects.filter(receiver=viewer, status="pending").count()
         self.assertEqual(pending, 2)
         self.assertContains(self.client.get(reverse("interactions:list")), "Прийняти")
+
+
+class HeroTests(TestCase):
+    """Hero: тексти демо-картки рендеряться на сервері, варіанти для ротації коректні, колір успадковується правильно."""
+
+    def home(self):
+        return self.client.get(reverse("home")).content.decode()
+
+    def test_demo_card_texts_are_rendered_on_server(self):
+        html = self.home()
+        for text in ("Андрій", "Львів · студент", ">89%<", "Бюджет", "Чистота", "Режим сну", "Гості", "Приклад формату результату"):
+            self.assertIn(text, html)
+        self.assertEqual(html.count("data-label"), 4)
+        self.assertEqual(html.count("data-value"), 4)
+
+    def test_variants_json_is_valid_and_first_matches_server_render(self):
+        import json
+        import re
+        html = self.home()
+        data = json.loads(re.search(r'id="demo-variants">(.*?)</script>', html, re.S).group(1))
+        self.assertGreaterEqual(len(data), 3)
+        for v in data:
+            self.assertTrue({"initial", "name", "meta", "score", "grad", "rows", "note"} <= set(v))
+            self.assertEqual(len(v["rows"]), 4)
+            self.assertTrue(0 <= v["score"] <= 100)
+        self.assertEqual(data[0]["name"], "Андрій")
+        self.assertIn(f">{data[0]['score']}%<", html)
+        self.assertEqual(len({v["name"] for v in data}), len(data))
+
+    def test_demo_card_does_not_inherit_white_hero_text(self):
+        """Раніше .hero{color:#fff} робило текст білим на білій картці."""
+        from pathlib import Path
+        from django.conf import settings
+        css = (Path(settings.BASE_DIR) / "static/css/main.css").read_text(encoding="utf-8")
+        rule = css.split(".demo{", 1)[1].split("}", 1)[0]
+        self.assertIn("color:var(--ink)", rule)
+
+    def test_rotation_script_respects_reduced_motion_and_has_controls(self):
+        from pathlib import Path
+        from django.conf import settings
+        js = (Path(settings.BASE_DIR) / "static/js/main.js").read_text(encoding="utf-8")
+        self.assertIn("prefers-reduced-motion", js)
+        self.assertIn("demo-variants", js)
+        self.assertIn("card.dataset.ready", js)  # ініціалізація ідемпотентна
+        self.assertIn('aria-pressed', js)
+        self.assertContains(self.client.get(reverse("home")), 'id="demo-dots"')
