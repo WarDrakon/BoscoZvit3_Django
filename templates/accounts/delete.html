@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block title %}Видалення акаунта — Roommate{% endblock %}
+{% block content %}
+<div class="container"><div class="auth card"><h1>Видалення акаунта</h1>
+<div class="notice notice-bad">Цю дію неможливо скасувати. Буде видалено профіль, анкету, оголошення, запити та всі повідомлення.</div>
+<form method="post" novalidate data-loading data-confirm="Остаточно видалити акаунт і всі дані?">{% csrf_token %}{% include "components/form_fields.html" %}
+<div class="form-actions"><button class="btn btn-danger" type="submit">Видалити назавжди</button><a class="btn btn-secondary" href="{% url 'accounts:settings' %}">Скасувати</a></div></form></div></div>
+{% endblock %}

@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Реєстрація — Roommate{% endblock %}
+{% block content %}
+<div class="auth-split">
+  <aside class="auth-aside">
+    <h2>Знайдіть співмешканця, з яким комфортно</h2>
+    <p>Створіть акаунт за хвилину, заповніть анкету й отримайте рекомендації з поясненням.</p>
+    <ul>
+      <li>{% include "components/icon.html" with name="check" %} Прозорий розрахунок сумісності з поясненнями</li>
+      <li>{% include "components/icon.html" with name="check" %} Критичні вимоги перевіряються першими</li>
+      <li>{% include "components/icon.html" with name="check" %} Контакти приховані до вашої згоди</li>
+    </ul>
+  </aside>
+  <div class="auth-main">
+  <div class="auth card">
+  <h1>Створення акаунта</h1>
+  <p class="muted">Ви зможете заповнити профіль і анкету одразу після реєстрації. Це безкоштовно.</p>
+  <form method="post" novalidate data-loading>
+    {% csrf_token %}
+    {% include "components/form_fields.html" %}
+    <button class="btn btn-primary" type="submit" style="width:100%">Зареєструватися</button>
+  </form>
+  <p class="small muted" style="margin-top:1rem">Вже є акаунт? <a href="{% url 'accounts:login' %}">Увійти</a></p>
+</div>
+  </div>
+</div>
+{% endblock %}

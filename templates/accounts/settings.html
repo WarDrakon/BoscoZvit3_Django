@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Налаштування акаунта — Roommate{% endblock %}
+{% block content %}
+<div class="page"><div class="narrow">
+  <div class="page-head"><h1>Налаштування акаунта</h1></div>
+  <div class="card">
+    <h2>Особисті дані</h2>
+    <p class="muted small">Електронна пошта використовується для входу й ніколи не показується іншим користувачам.</p>
+    <form method="post" novalidate data-loading>{% csrf_token %}{% include "components/form_fields.html" %}
+      <div class="form-actions"><button class="btn btn-primary" type="submit">Зберегти</button></div></form>
+  </div>
+  <div class="card">
+    <h2>Безпека</h2>
+    <div class="btn-row"><a class="btn btn-secondary" href="{% url 'accounts:password_change' %}">Змінити пароль</a>
+    <a class="btn btn-secondary" href="{% url 'interactions:blocks' %}">Заблоковані користувачі</a></div>
+  </div>
+  <div class="card">
+    <h2>Деактивація та видалення</h2>
+    <p class="muted">Деактивація приховує профіль, але зберігає дані. Видалення остаточно стирає акаунт, профіль, оголошення, запити та повідомлення.</p>
+    <div class="btn-row"><a class="btn btn-secondary" href="{% url 'accounts:deactivate' %}">Деактивувати акаунт</a>
+    <a class="btn btn-danger" href="{% url 'accounts:delete' %}">Видалити акаунт</a></div>
+  </div>
+</div></div>
+{% endblock %}
