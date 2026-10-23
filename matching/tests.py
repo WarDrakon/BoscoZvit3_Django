@@ -456,3 +456,36 @@ class CriticalConflictSearchRegressionTests(TestCase):
         self.assertEqual(self.card_names(self.get(show_conflicts="on", only_housing="on")), ["Курець"])
         self.assertEqual(self.card_names(self.get(show_conflicts="on", min_score=100)), [])
         self.assertEqual(self.card_names(self.get(show_conflicts="on", sort="name")), ["Добрий", "Курець"])
+
+
+class FilterLayoutTests(TestCase):
+    """Фільтри: поля в одній сітці, чекбокси й кнопка — в окремому рядку під сіткою."""
+
+    def setUp(self):
+        self.user = User.objects.create_user("f@example.com", "Sup3r-secret-pass", first_name="Ф", last_name="Т")
+        self.client.force_login(self.user)
+
+    def html(self):
+        return self.client.get(reverse("matching:recommendations")).content.decode()
+
+    def test_checkboxes_and_button_live_in_footer_row(self):
+        html = self.html()
+        grid, foot = html.split('class="filters-foot"', 1)
+        grid = grid.split('class="filters"', 1)[1]
+        self.assertNotIn('type="checkbox"', grid)
+        self.assertEqual(foot.count('type="checkbox"'), 2)
+        self.assertLess(foot.index('type="checkbox"'), foot.index("Застосувати"))
+        for label in ("Хто шукає", "Місто", "Сумісність від, %", "Бюджет кандидата до, грн", "Сортування"):
+            self.assertIn(label, grid)
+
+    def test_budget_field_has_no_help_text_that_breaks_the_grid(self):
+        html = self.html()
+        self.assertNotIn("Показати тих, чия мінімальна сума", html)
+        self.assertIn('placeholder="напр. 8000"', html)
+
+    def test_filter_css_is_responsive(self):
+        from pathlib import Path
+        from django.conf import settings
+        css = (Path(settings.BASE_DIR) / "static/css/main.css").read_text(encoding="utf-8")
+        for rule in (".filters-foot{", ".filters-checks{", "repeat(auto-fit,minmax(170px,1fr))", "@media(max-width:620px){.filters-checks{"):
+            self.assertIn(rule, css)

@@ -7,9 +7,17 @@
 <div class="page"><div class="container">
   
 
-  <form method="get" autocomplete="off" class="card" style="margin-bottom:1.5rem"><div class="filters">
-    {% for field in form %}{% include "components/field.html" %}{% endfor %}
-    <div class="field"><button class="btn btn-primary" type="submit" style="width:100%">Застосувати</button></div></div></form>
+  <form method="get" autocomplete="off" class="card filters-card">
+    <div class="filters">
+      {% for field in form %}{% if field.field.widget.input_type != "checkbox" %}{% include "components/field.html" %}{% endif %}{% endfor %}
+    </div>
+    <div class="filters-foot">
+      <div class="filters-checks">
+        {% for field in form %}{% if field.field.widget.input_type == "checkbox" %}{% include "components/field.html" %}{% endif %}{% endfor %}
+      </div>
+      <button class="btn btn-primary" type="submit">Застосувати</button>
+    </div>
+  </form>
 
   {% if invalid_filters %}
     <div class="notice notice-warn" role="alert">{% include "components/icon.html" with name="alert" %} Не застосовано через помилку в полі: {{ invalid_filters|join:", " }}. Решту фільтрів, зокрема «Показувати кандидатів із критичними конфліктами», застосовано.</div>
