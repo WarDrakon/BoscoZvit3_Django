@@ -1,6 +1,6 @@
 from django import forms
 
-from config.forms import StyledFormMixin
+from config.forms import LiveValidationMixin, StyledFormMixin
 
 from .models import CRITERIA, CriterionWeight, LifestylePreference, Profile, SearchPreference
 
@@ -9,12 +9,16 @@ ANY = "Неважливо"
 UNSPECIFIED = "Не вказано"
 
 
-class ProfileForm(StyledFormMixin, forms.ModelForm):
+class ProfileForm(LiveValidationMixin, StyledFormMixin, forms.ModelForm):
+    live_names = {"display_name": "Публічне ім’я"}
+
+    birth_date = forms.DateField(label="Дата народження", required=False, widget=DATE_WIDGET,
+                                 help_text="Вік має бути від 18 до 100 років. Він обчислюється автоматично; іншим показується лише вік.")
     move_in_date = forms.DateField(label="Орієнтовна дата заселення", required=False, widget=DATE_WIDGET)
 
     class Meta:
         model = Profile
-        fields = ["display_name", "photo", "city", "occupation", "about", "search_mode", "move_in_date", "is_active_search"]
+        fields = ["display_name", "photo", "city", "occupation", "about", "search_mode", "birth_date", "move_in_date", "is_active_search"]
         widgets = {"about": forms.Textarea(attrs={"rows": 4, "placeholder": "Розкажіть про свій розпорядок, інтереси та очікування від спільного проживання"})}
         help_texts = {"photo": "JPG, PNG або WEBP, до 5 МБ.",
                       "is_active_search": "Вимкніть, щоб тимчасово не показуватись в рекомендаціях."}
@@ -47,6 +51,10 @@ class SearchForm(StyledFormMixin, forms.ModelForm):
     """Параметри пошуку + важливість критеріїв (поля w_<критерій>, c_<критерій>)."""
 
     move_in_date = forms.DateField(label="Бажана дата заселення", required=False, widget=DATE_WIDGET)
+    req_age_min = forms.IntegerField(label="Вік від", required=False, min_value=18, max_value=120,
+                                     widget=forms.NumberInput(attrs={"placeholder": "напр. 18"}))
+    req_age_max = forms.IntegerField(label="Вік до", required=False, min_value=18, max_value=120,
+                                     widget=forms.NumberInput(attrs={"placeholder": "напр. 35"}))
     req_min_cleanliness = forms.TypedChoiceField(
         label="Мінімально прийнятна охайність співмешканця", required=False, coerce=int, empty_value=None,
         choices=[("", ANY)] + [(i, f"Не нижче {i}") for i in range(1, 6)])
@@ -56,8 +64,8 @@ class SearchForm(StyledFormMixin, forms.ModelForm):
 
     class Meta:
         model = SearchPreference
-        fields = ["city", "district", "budget_min", "budget_max", "move_in_date", "req_sleep", "req_min_cleanliness",
-                  "req_max_noise", "req_guests", "req_smoking", "req_pets", "req_chores"]
+        fields = ["city", "district", "budget_min", "budget_max", "move_in_date", "req_age_min", "req_age_max",
+                  "req_sleep", "req_min_cleanliness", "req_max_noise", "req_guests", "req_smoking", "req_pets", "req_chores"]
         widgets = {"budget_min": forms.NumberInput(attrs={"min": 0, "step": 100, "placeholder": "напр. 5000"}),
                    "budget_max": forms.NumberInput(attrs={"min": 0, "step": 100, "placeholder": "напр. 8000"})}
 

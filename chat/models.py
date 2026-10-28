@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.db import models
 from django.db.models import F, Q
+from django.urls import reverse
 
 
 class ConversationManager(models.Manager):
@@ -34,6 +35,9 @@ class Conversation(models.Model):
 
     def __str__(self):
         return f"Розмова #{self.pk}"
+
+    def get_absolute_url(self):
+        return reverse("chat:detail", kwargs={"conversation_id": self.pk})
 
     def other_user(self, user):
         return self.user_two if self.user_one_id == user.pk else self.user_one

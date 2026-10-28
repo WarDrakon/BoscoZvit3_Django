@@ -1,6 +1,6 @@
 # Roommate — система підтримки прийняття рішень для підбору співмешканців
 
-Django 5.2 · MySQL 8 · Django Templates · JavaScript (Fetch API). Інтерфейс повністю українською.
+Django 5.2 · MySQL 8 · Django Templates · Bootstrap 5.3 (утиліти) + власний CSS · JavaScript (Fetch API). Інтерфейс повністю українською.
 
 ## Можливості
 - Реєстрація/вхід за email, відновлення пароля поштою, зміна пароля, деактивація та повне видалення акаунта.
@@ -15,6 +15,13 @@ Django 5.2 · MySQL 8 · Django Templates · JavaScript (Fetch API). Інтер�
 Напрямкова оцінка `S = Σ(wᵢ·sᵢ) / Σwᵢ`. Критерії з «Неважливо» не враховуються. Якщо вимога є, а даних кандидата бракує, критерій отримує нейтральну оцінку 0,5 (невідомо ≠ збіг) і зменшує «повноту даних»; якщо порівняти нічого, оцінка не розраховується («Недостатньо даних»).
 Взаємна сумісність `M = 0.6·середнє(S_AB, S_BA) + 0.4·min(S_AB, S_BA)` — мінімум штрафує односторонню відповідність.
 Критичні вимоги (sᵢ < 0.5) та різні міста дають «критичний конфлікт»: такі кандидати не потрапляють в основні рекомендації.
+
+## Структура та вимоги до звіту
+- Застосунки: `accounts`, `profiles`, `housing`, `matching`, `interactions`, `chat`; налаштування — `config/`.
+- Власні теги шаблонів: `matching/templatetags/roommate_tags.py` (`score_level`, `score_ring`).
+- Data-міграція (`RunPython`): `accounts/migrations/0003_create_moderators_group.py` створює групу «Модератори».
+- CSS: Bootstrap 5.3 підключено лише шаром утиліт (CDN, потрібен інтернет) — без reboot/`.btn`/`.card`, щоб не змінювати дизайн Midnight & Aurora; решта стилів — `static/css/main.css`.
+- Змінні оточення описані в `.env.example` (значення задаються лише в `.env`, який у `.gitignore`).
 
 ## Налаштування MySQL
 ```sql
@@ -50,7 +57,7 @@ python manage.py seed_demo --reset          # видалити й створит
 
 ## Тести
 ```bash
-python manage.py test                       # 136 тестів; потрібен доступ до MySQL (Django створить тестову БД)
+python manage.py test                       # автотести всіх застосунків; потрібен доступ до MySQL (Django створить тестову БД)
 DB_ENGINE=sqlite python manage.py test      # швидкий запуск без MySQL
 ```
 

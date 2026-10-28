@@ -43,6 +43,23 @@ def S(city, district, lo, hi, days, **req):
 
 
 # ключ, ім’я, прізвище, режим, рід занять, про себе, звички, пошук, ваги, критичні, оголошення
+# Вік демо-користувачів (повних років): різний, правдоподібний, не менший за 18.
+AGES = {
+    "andriy.koval": 20, "olena.melnyk": 29, "ihor.lytvyn": 31, "mariia.shevchuk": 26, "taras.bondar": 23, "sofiia.honchar": 27,
+    "nazar.kravchuk": 19, "oleksii.hryniv": 34, "viktoriia.kushnir": 18, "daryna.oliinyk": 28, "maksym.tkachenko": 36,
+    "anastasiia.boiko": 32, "vladyslav.moroz": 21, "kateryna.lysenko": 41, "bohdan.pavlenko": 25, "yuliia.romaniuk": 22,
+    "artem.savchenko": 38, "oksana.hnatiuk": 45, "roman.stelmakh": 30, "iryna.danyliuk": 52,
+}
+
+
+def birth_date_for(key, age, today=None):
+    """Стабільна дата народження, за якої сьогодні виповнилося рівно `age` років (день ≤ 27 — без проблем із лютим)."""
+    today = today or date.today()
+    code = sum(map(ord, key))
+    month, day = code % 12 + 1, code % 27 + 1
+    return date(today.year - age - ((month, day) > (today.month, today.day)), month, day)
+
+
 PEOPLE = [
     ("andriy.koval", "Андрій", "Коваленко", "joint", "Студент, ІТ", "Рано встаю, люблю тишу й порядок. Шукаю спокійного співмешканця для спільної оренди.",
      H("early", 5, 2, "sometimes", "no", "none", "study", "split"),
@@ -235,6 +252,7 @@ class Command(BaseCommand):
         p = user.profile
         p.display_name, p.city, p.occupation, p.search_mode, p.is_active_search = first, search["city"], job, mode, True
         p.about = about + MARK
+        p.birth_date = birth_date_for(key, AGES[key])  # оновлюється й у наявних демо-акаунтів; інших користувачів не чіпаємо
         p.move_in_date = date.today() + timedelta(days=search["move_in_offset"])
         if not p.photo:
             p.photo.save(f"demo_{key}.png", ContentFile(make_avatar(i)), save=False)

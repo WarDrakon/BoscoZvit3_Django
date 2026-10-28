@@ -369,3 +369,46 @@ section.dark .section-head p{color:#C3BEEA}
   *,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important;scroll-behavior:auto!important}
   .js .reveal{opacity:1;transform:none}
 }
+
+/* Реєстрація: пароль — показ/приховування, 5 рівнів надійності, вимоги, збіг із підтвердженням */
+.pw-input{position:relative}
+.pw-input .input{padding-right:3.2rem}
+.pw-toggle{position:absolute;top:50%;right:.35rem;transform:translateY(-50%);width:40px;height:40px;display:grid;place-items:center;border:0;border-radius:10px;background:transparent;color:var(--muted);cursor:pointer;transition:background .18s,color .18s}
+.pw-toggle:hover,.pw-toggle[aria-pressed="true"]{background:var(--violet-l);color:var(--violet-d)}
+.pw-toggle svg{width:1.3rem;height:1.3rem;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.pw-meter{--pw:var(--line-2);--pw-text:var(--muted);margin-top:.7rem}
+.pw-track{position:relative;height:10px;border-radius:99px;background:var(--line);overflow:hidden}
+.pw-fill{height:100%;width:0;border-radius:99px;background:var(--pw);transition:width .45s var(--ease),background .35s}
+.pw-tick{position:absolute;top:0;bottom:0;width:2px;background:var(--paper)}
+.pw-status{display:flex;flex-wrap:wrap;gap:.2rem .8rem;justify-content:space-between;align-items:baseline;margin-top:.45rem;font-size:.88rem}
+.pw-label{font-weight:680;color:var(--pw-text);transition:color .3s}
+.pw-hint{color:var(--bad);font-weight:560}
+.pw-meter[data-level="0"]{--pw:linear-gradient(90deg,var(--bad),#E5533D);--pw-text:var(--bad)}
+.pw-meter[data-level="1"]{--pw:linear-gradient(90deg,#E5533D,#F29A12);--pw-text:var(--coral)}
+.pw-meter[data-level="2"]{--pw:linear-gradient(90deg,#F29A12,var(--amber));--pw-text:var(--warn)}
+.pw-meter[data-level="3"]{--pw:linear-gradient(90deg,#14A37F,#5BD6B0);--pw-text:var(--good)}
+.pw-meter[data-level="4"]{--pw:linear-gradient(90deg,var(--violet),#14A37F);--pw-text:var(--violet-d)}
+.pw-meter[data-level="0"] .pw-fill{width:20%}.pw-meter[data-level="1"] .pw-fill{width:40%}.pw-meter[data-level="2"] .pw-fill{width:60%}
+.pw-meter[data-level="3"] .pw-fill{width:80%}.pw-meter[data-level="4"] .pw-fill{width:100%}
+.pw-rules{list-style:none;margin:.65rem 0 0;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.3rem 1rem;font-size:.86rem}
+.pw-rule{display:flex;align-items:center;gap:.5rem;color:var(--muted);transition:color .25s}
+.pw-mark{width:1.1rem;height:1.1rem;border-radius:50%;border:1.5px solid var(--line-2);flex:none;display:grid;place-items:center;font-size:.7rem;line-height:1;font-weight:800;transition:background .25s,border-color .25s,color .25s,transform .25s var(--ease)}
+.pw-rule[data-state="ok"]{color:var(--good)}
+.pw-rule[data-state="ok"] .pw-mark{background:var(--good);border-color:var(--good);color:#fff;transform:scale(1.08)}
+.pw-rule[data-state="ok"] .pw-mark::before{content:"✓"}
+.pw-rule[data-state="no"]{color:var(--ink-2)}
+.pw-rule[data-state="no"] .pw-mark{border-color:var(--bad);color:var(--bad)}
+.pw-rule[data-state="no"] .pw-mark::before{content:"×"}
+.pw-match{margin-top:.4rem;font-size:.88rem;font-weight:620}
+.pw-match[data-state="ok"]{color:var(--good)}.pw-match[data-state="ok"]::before{content:"✓ "}
+.pw-match[data-state="no"]{color:var(--bad)}.pw-match[data-state="no"]::before{content:"× "}
+.pw-error{margin-top:.7rem;padding:.7rem .95rem;border-radius:12px;background:var(--bad-bg);border:1px solid #F6C2BD;border-left:5px solid var(--bad);color:#7A140C;font-size:.9rem;animation:rise .3s var(--ease)}
+.pw-error[hidden]{display:none}
+.pw-error ul{margin:.3rem 0 0;padding-left:1.1rem}
+@media(max-width:480px){.pw-rules{grid-template-columns:1fr}}
+
+/* Миттєва перевірка імені та дати народження */
+.live-error{margin-top:.35rem;font-size:.88rem;font-weight:560;color:var(--bad);animation:rise .25s var(--ease)}
+.live-error[hidden]{display:none}
+.input.is-invalid{border-color:var(--bad);box-shadow:0 0 0 3px rgba(180,35,24,.12)}
+.cand-name,.page-head h1,.cand-head h2{overflow-wrap:anywhere}

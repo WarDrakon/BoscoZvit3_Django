@@ -1,8 +1,12 @@
+from datetime import date
+
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.urls import reverse
 
+from config.person_validators import display_name_validator, validate_birth_date
 from config.validators import validate_image_file
 
 # Критерії, за якими система порівнює двох користувачів
@@ -10,6 +14,7 @@ CRITERIA = [
     ("budget", "Бюджет"),
     ("location", "Місто та район"),
     ("move_in", "Дата заселення"),
+    ("age", "Вік"),
     ("sleep", "Режим сну"),
     ("cleanliness", "Чистота"),
     ("noise", "Рівень шуму"),
@@ -30,12 +35,13 @@ class Profile(models.Model):
 
     profile_id = models.AutoField(primary_key=True)
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="profile")
-    display_name = models.CharField("Публічне ім’я", max_length=60)
+    display_name = models.CharField("Публічне ім’я", max_length=60, validators=[display_name_validator])
     photo = models.ImageField("Фотографія", upload_to="profiles/", blank=True, validators=[validate_image_file])
     city = models.CharField("Місто", max_length=100, blank=True)
     occupation = models.CharField("Рід занять", max_length=120, blank=True)
     about = models.TextField("Про себе", max_length=1000, blank=True)
     search_mode = models.CharField("Режим пошуку", max_length=20, choices=Mode.choices, default=Mode.JOINT)
+    birth_date = models.DateField("Дата народження", null=True, blank=True, validators=[validate_birth_date])
     move_in_date = models.DateField("Орієнтовна дата заселення", null=True, blank=True)
     is_active_search = models.BooleanField("Я зараз шукаю співмешканця", default=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -48,6 +54,37 @@ class Profile(models.Model):
 
     def __str__(self):
         return self.display_name
+
+    def get_absolute_url(self):
+        return reverse("matching:candidate", kwargs={"profile_id": self.pk})
+
+    @property
+    def age(self):
+        """Повні роки на поточну дату. None, якщо дата народження не вказана."""
+        if not self.birth_date:
+            return None
+        today = date.today()
+        return today.year - self.birth_date.year - ((today.month, today.day) < (self.birth_date.month, self.birth_date.day))
+
+    @property
+    def age_text(self):
+        """«22 роки» або None, якщо дата народження не вказана (для «Марія, 22 роки»)."""
+        age = self.age
+        return None if age is None else years_ua(age)
+
+    @property
+    def age_label(self):
+        """«22 роки» або «Вік не вказано»."""
+        return self.age_text or "Вік не вказано"
+
+
+def years_ua(n):
+    """«1 рік», «22 роки», «25 років», «11 років»."""
+    if 11 <= n % 100 <= 14:
+        word = "років"
+    else:
+        word = {1: "рік", 2: "роки", 3: "роки", 4: "роки"}.get(n % 10, "років")
+    return f"{n} {word}"
 
 
 class LifestylePreference(models.Model):
@@ -98,6 +135,8 @@ class SearchPreference(models.Model):
     budget_min = models.PositiveIntegerField("Бюджет від, грн/міс.", null=True, blank=True)
     budget_max = models.PositiveIntegerField("Бюджет до, грн/міс.", null=True, blank=True)
     move_in_date = models.DateField("Бажана дата заселення", null=True, blank=True)
+    req_age_min = models.PositiveSmallIntegerField("Вік від", null=True, blank=True, validators=[MinValueValidator(18), MaxValueValidator(120)])
+    req_age_max = models.PositiveSmallIntegerField("Вік до", null=True, blank=True, validators=[MinValueValidator(18), MaxValueValidator(120)])
     req_sleep = models.CharField("Режим сну співмешканця", max_length=10, choices=SLEEP, default="any")
     req_min_cleanliness = models.PositiveSmallIntegerField("Мінімально прийнятна охайність", null=True, blank=True,
                                                           validators=SCALE_1_5)

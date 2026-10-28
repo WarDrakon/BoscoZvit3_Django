@@ -2,6 +2,8 @@ from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, Permis
 from django.db import models
 from django.utils import timezone
 
+from config.person_validators import first_name_validator, last_name_validator
+
 
 class UserManager(BaseUserManager):
     use_in_migrations = True
@@ -33,8 +35,8 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     user_id = models.AutoField(primary_key=True)
     email = models.EmailField("Електронна пошта", unique=True)
-    first_name = models.CharField("Ім’я", max_length=60)
-    last_name = models.CharField("Прізвище", max_length=60)
+    first_name = models.CharField("Ім’я", max_length=60, validators=[first_name_validator])
+    last_name = models.CharField("Прізвище", max_length=60, validators=[last_name_validator])
     is_active = models.BooleanField("Активний", default=True)
     is_staff = models.BooleanField("Доступ до адмінпанелі", default=False)
     date_joined = models.DateTimeField("Дата реєстрації", default=timezone.now)

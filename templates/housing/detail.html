@@ -21,7 +21,7 @@
       </div>
       <div class="card">
         <div class="cand-head">{% include "components/avatar.html" with profile=listing.owner.profile %}
-          <div><div class="muted small">Власник оголошення</div><strong>{{ listing.owner.profile.display_name }}</strong></div></div>
+          <div><div class="muted small">Власник оголошення</div><strong>{{ listing.owner.profile.display_name }}{% if listing.owner.profile.age_text %}, {{ listing.owner.profile.age_text }}{% endif %}</strong>{% if not listing.owner.profile.age_text %}<div class="muted small">Вік не вказано</div>{% endif %}</div></div>
         {% if compat %}
         <a class="compat-quick" href="{% url 'matching:candidate' listing.owner.profile.pk %}" title="Переглянути детальне пояснення сумісності">
           {% if compat.score is not None %}

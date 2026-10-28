@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Реєстрація — Roommate{% endblock %}
 {% block content %}
 <div class="auth-split">
@@ -14,8 +15,8 @@
   <div class="auth-main">
   <div class="auth card">
   <h1>Створення акаунта</h1>
-  <p class="muted">Ви зможете заповнити профіль і анкету одразу після реєстрації. Це безкоштовно.</p>
-  <form method="post" novalidate data-loading>
+  <p class="muted">Ви зможете заповнити профіль і анкету одразу після реєстрації.</p>
+  <form method="post" novalidate data-loading data-pw-check-url="{% url 'accounts:password_check' %}">
     {% csrf_token %}
     {% include "components/form_fields.html" %}
     <button class="btn btn-primary" type="submit" style="width:100%">Зареєструватися</button>
@@ -25,3 +26,4 @@
   </div>
 </div>
 {% endblock %}
+{% block scripts %}<script src="{% static 'js/password.js' %}" defer></script>{% endblock %}

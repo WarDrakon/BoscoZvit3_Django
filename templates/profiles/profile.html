@@ -10,7 +10,7 @@
   <div class="grid grid-2">
     <div class="card">
       <div class="cand-head" style="margin-bottom:1rem">{% include "components/avatar.html" with large=True %}
-        <div><h2 style="margin:0">{{ profile.display_name }}</h2><div class="muted">{{ profile.city|default:"Місто не вказано" }}</div>
+        <div><h2 style="margin:0">{{ profile.display_name }}{% if profile.age_text %}, {{ profile.age_text }}{% endif %}</h2><div class="muted">{% if not profile.age_text %}Вік не вказано · {% endif %}{{ profile.city|default:"Місто не вказано" }}</div>
         <div class="tags" style="margin-top:.4rem"><span class="tag">{{ profile.get_search_mode_display }}</span>
         {% if profile.is_active_search %}<span class="tag tag-good">Шукаю зараз</span>{% else %}<span class="tag tag-warn">Пошук призупинено</span>{% endif %}</div></div></div>
       <dl class="facts">

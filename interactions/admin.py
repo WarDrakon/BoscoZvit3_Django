@@ -13,6 +13,8 @@ class ContactRequestAdmin(admin.ModelAdmin):
 @admin.register(UserBlock)
 class UserBlockAdmin(admin.ModelAdmin):
     list_display = ("blocker", "blocked", "created_at")
+    search_fields = ("blocker__email", "blocked__email")
+    list_filter = ("created_at",)
 
 
 @admin.register(Report)

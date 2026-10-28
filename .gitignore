@@ -9,3 +9,7 @@ staticfiles/
 .idea/
 .vscode/
 .DS_Store
+.claude/
+*.sqlite3
+*.log
+.env.local

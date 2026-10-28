@@ -1,0 +1,1 @@
+{% if has_score %}<div class="{{ classes }}" style="--p:{{ score|floatformat:0 }}" role="img" aria-label="Сумісність {{ score|floatformat:0 }} відсотків"><span>{{ score|floatformat:0 }}%</span></div>{% else %}<div class="{{ classes }}" style="--p:0"><span>—</span></div>{% endif %}

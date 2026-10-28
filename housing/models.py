@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.urls import reverse
 
 from config.validators import validate_image_file
 
@@ -32,6 +33,9 @@ class HousingListing(models.Model):
 
     def __str__(self):
         return f"{self.title} ({self.city})"
+
+    def get_absolute_url(self):
+        return reverse("housing:detail", kwargs={"housing_id": self.pk})
 
     @property
     def is_public(self):

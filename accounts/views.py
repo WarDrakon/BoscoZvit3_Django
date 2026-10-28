@@ -1,11 +1,14 @@
 from django.contrib import messages
-from django.contrib.auth import login, logout, update_session_auth_hash
+from django.contrib.auth import login, logout, password_validation, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.views import (LoginView, PasswordChangeView, PasswordResetCompleteView,
                                        PasswordResetConfirmView, PasswordResetDoneView, PasswordResetView)
+from django.core.exceptions import ValidationError
+from django.http import JsonResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse_lazy
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_http_methods, require_POST
 
 from .forms import (AccountForm, ConfirmPasswordForm, EmailLoginForm, RegisterForm, StyledPasswordChangeForm,
                     StyledPasswordResetForm, StyledSetPasswordForm)
@@ -105,3 +108,23 @@ class SitePasswordResetConfirmView(PasswordResetConfirmView):
 
 class SitePasswordResetCompleteView(PasswordResetCompleteView):
     template_name = "registration/password_reset_complete.html"
+
+
+@require_POST
+@never_cache
+def password_check(request):
+    """Підказка для індикатора на сторінці реєстрації: ті самі валідатори, що й у формі. Нічого не зберігає."""
+    from config.password_validators import registration_validators
+    from .models import User
+    password = request.POST.get("password", "")[:128]
+    user = User(email=request.POST.get("email", "")[:254], first_name=request.POST.get("first_name", "")[:60],
+                last_name=request.POST.get("last_name", "")[:60])
+    codes, texts = [], []
+    if password:
+        try:
+            password_validation.validate_password(password, user, password_validators=registration_validators())
+        except ValidationError as error:
+            for item in error.error_list:
+                codes.append(item.code)
+                texts.append(" ".join(item.messages))
+    return JsonResponse({"ok": not codes, "codes": codes, "messages": texts})

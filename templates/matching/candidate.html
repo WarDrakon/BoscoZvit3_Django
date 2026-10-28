@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load roommate_tags %}
 {% block title %}{{ profile.display_name }} — Roommate{% endblock %}
 {% block content %}
 <div class="page"><div class="container">
@@ -6,8 +7,8 @@
   <div class="card">
     <div class="cand-head" style="gap:1.25rem;flex-wrap:wrap">
       {% include "components/avatar.html" with large=True %}
-      <div style="flex:1;min-width:220px"><h1 style="margin:0">{{ profile.display_name }}</h1>
-        <div class="muted">{{ profile.city|default:"Місто не вказано" }}{% if profile.occupation %} · {{ profile.occupation }}{% endif %}</div>
+      <div style="flex:1;min-width:220px"><h1 style="margin:0">{{ profile.display_name }}{% if profile.age_text %}, {{ profile.age_text }}{% endif %}</h1>
+        <div class="muted">{% if not profile.age_text %}Вік не вказано · {% endif %}{{ profile.city|default:"Місто не вказано" }}{% if profile.occupation %} · {{ profile.occupation }}{% endif %}</div>
         <div class="tags" style="margin-top:.5rem"><span class="tag">{{ profile.get_search_mode_display }}</span>
           {% if listings %}<span class="tag tag-good">Має житло</span>{% endif %}
           {% if profile.move_in_date %}<span class="tag">Заселення: {{ profile.move_in_date|date:"d.m.Y" }}</span>{% endif %}</div></div>
@@ -26,7 +27,7 @@
   <div class="card">
     <div class="score" style="gap:1.5rem;flex-wrap:wrap">
       {% if outcome.score is not None %}
-        <div class="ring lg {% if outcome.score >= 75 %}{% elif outcome.score >= 50 %}mid{% else %}low{% endif %}" style="--p:{{ outcome.score|floatformat:0 }}" role="img" aria-label="Сумісність {{ outcome.score|floatformat:0 }} відсотків"><span>{{ outcome.score|floatformat:0 }}%</span></div>
+        {% score_ring outcome.score "lg" %}
         <div style="flex:1;min-width:240px"><h2 style="margin-bottom:.3rem">Взаємна сумісність</h2>
           <p class="muted" style="margin:0">Ваші вимоги виконано на {{ outcome.score_ab|default_if_none:"—"|floatformat:0 }}%, вимоги кандидата — на {{ outcome.score_ba|default_if_none:"—"|floatformat:0 }}%. Повнота даних: {{ outcome.coverage|default_if_none:"—" }}%.</p></div>
       {% else %}

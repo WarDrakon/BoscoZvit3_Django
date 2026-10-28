@@ -1,9 +1,9 @@
-<article class="card cand">
+{% load roommate_tags %}<article class="card cand">
   <div class="cand-head">
     {% include "components/avatar.html" %}
     <div>
-      <h3 class="cand-name"><a href="{% url 'matching:candidate' profile.pk %}" style="color:inherit;text-decoration:none">{{ profile.display_name }}</a></h3>
-      <div class="muted small">{{ profile.city|default:"Місто не вказано" }}{% if profile.occupation %} · {{ profile.occupation }}{% endif %}</div>
+      <h3 class="cand-name"><a href="{% url 'matching:candidate' profile.pk %}" style="color:inherit;text-decoration:none">{{ profile.display_name }}{% if profile.age_text %}, {{ profile.age_text }}{% endif %}</a></h3>
+      <div class="muted small">{% if not profile.age_text %}Вік не вказано · {% endif %}{{ profile.city|default:"Місто не вказано" }}{% if profile.occupation %} · {{ profile.occupation }}{% endif %}</div>
     </div>
   </div>
   <div class="tags">
@@ -13,7 +13,7 @@
   </div>
   <div class="score">
     {% if outcome.score is not None %}
-      <div class="ring {% if outcome.score >= 75 %}{% elif outcome.score >= 50 %}mid{% else %}low{% endif %}" style="--p:{{ outcome.score|floatformat:0 }}" role="img" aria-label="Сумісність {{ outcome.score|floatformat:0 }} відсотків"><span>{{ outcome.score|floatformat:0 }}%</span></div>
+      {% score_ring outcome.score %}
       <div class="small"><strong>Сумісність</strong>{% if outcome.is_preliminary %}<br><span class="tag tag-warn">Попередня оцінка</span>{% endif %}</div>
     {% else %}
       <div class="ring" style="--p:0"><span>—</span></div>

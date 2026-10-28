@@ -22,7 +22,9 @@ _load_env_file(BASE_DIR / ".env")
 
 
 def env(name, default=None):
-    return os.environ.get(name, default)
+    """Порожнє значення в .env вважається незаданим (використовується default)."""
+    value = os.environ.get(name)
+    return default if value is None or value == "" else value
 
 
 DEBUG = env("DJANGO_DEBUG", "False") == "True"

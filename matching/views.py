@@ -28,7 +28,7 @@ def _low_budget(profile, listing):
 
 
 # Порядок застосування фільтрів фіксований: так причину порожнього списку можна пояснити точно.
-FILTER_ORDER = ("mode", "city", "only_housing", "min_score", "max_budget")
+FILTER_ORDER = ("mode", "city", "only_housing", "min_score", "max_budget", "min_age", "max_age")
 
 
 def _matches(name, value, profile, outcome):
@@ -44,6 +44,10 @@ def _matches(name, value, profile, outcome):
         return outcome.score is not None and outcome.score >= value
     if name == "max_budget":
         return profile.low_budget is None or profile.low_budget <= value
+    if name == "min_age":
+        return profile.age is not None and profile.age >= value
+    if name == "max_age":
+        return profile.age is not None and profile.age <= value
     return True
 
 

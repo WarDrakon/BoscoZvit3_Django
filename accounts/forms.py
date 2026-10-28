@@ -2,20 +2,32 @@ from django import forms
 from django.contrib.auth import password_validation
 from django.contrib.auth.forms import AuthenticationForm, PasswordChangeForm, PasswordResetForm, SetPasswordForm
 
-from config.forms import StyledFormMixin
+from config.forms import LiveValidationMixin, StyledFormMixin
+from config.person_validators import AGE_MAX, AGE_MIN
+from config.password_validators import registration_validators
 
 from .models import User
 
 
-class RegisterForm(StyledFormMixin, forms.ModelForm):
-    password1 = forms.CharField(label="Пароль", widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}),
-                                help_text="Щонайменше 8 символів, не лише цифри.")
-    password2 = forms.CharField(label="Підтвердіть пароль", widget=forms.PasswordInput(attrs={"autocomplete": "new-password"}))
+class RegisterForm(LiveValidationMixin, StyledFormMixin, forms.ModelForm):
+    live_names = {"first_name": "Ім’я", "last_name": "Прізвище"}
+
+    # data-pw-*: підключають індикатор надійності (static/js/password.js). Це лише підказка в браузері,
+    # остаточну перевірку виконують валідатори Django у clean() нижче.
+    password1 = forms.CharField(label="Пароль", widget=forms.PasswordInput(attrs={"autocomplete": "new-password", "data-pw": "main"}),
+                                help_text="Щонайменше 8 символів: великі й малі літери, цифри та спеціальні символи.")
+    password2 = forms.CharField(label="Підтвердіть пароль", widget=forms.PasswordInput(attrs={"autocomplete": "new-password", "data-pw": "confirm"}))
+    birth_date = forms.DateField(label="Дата народження", required=False, widget=forms.DateInput(attrs={"type": "date"}),
+                                 help_text=f"Вік має бути від {AGE_MIN} до {AGE_MAX} років. Іншим користувачам показується лише вік.")
 
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email"]
         widgets = {"email": forms.EmailInput(attrs={"autocomplete": "email"})}
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields["password2"].widget.attrs["data-pw-main"] = self["password1"].id_for_label
 
     def clean_email(self):
         email = self.cleaned_data["email"].strip().lower()
@@ -32,7 +44,8 @@ class RegisterForm(StyledFormMixin, forms.ModelForm):
             try:
                 password_validation.validate_password(p1, User(email=cleaned.get("email", ""),
                                                                first_name=cleaned.get("first_name", ""),
-                                                               last_name=cleaned.get("last_name", "")))
+                                                               last_name=cleaned.get("last_name", "")),
+                                                      password_validators=registration_validators())
             except forms.ValidationError as error:
                 self.add_error("password1", error)
         return cleaned
@@ -42,6 +55,11 @@ class RegisterForm(StyledFormMixin, forms.ModelForm):
         user.set_password(self.cleaned_data["password1"])
         if commit:
             user.save()
+            birth_date = self.cleaned_data.get("birth_date")
+            if birth_date:
+                profile = user.profile
+                profile.birth_date = birth_date
+                profile.save(update_fields=["birth_date"])
         return user
 
 
@@ -58,7 +76,9 @@ class EmailLoginForm(StyledFormMixin, AuthenticationForm):
         self.fields["password"].label = "Пароль"
 
 
-class AccountForm(StyledFormMixin, forms.ModelForm):
+class AccountForm(LiveValidationMixin, StyledFormMixin, forms.ModelForm):
+    live_names = {"first_name": "Ім’я", "last_name": "Прізвище"}
+
     class Meta:
         model = User
         fields = ["first_name", "last_name", "email"]

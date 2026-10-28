@@ -34,7 +34,8 @@ document.addEventListener("DOMContentLoaded", () => {
   }
   // Стан завантаження: блокуємо кнопку після відправлення форми, щоб уникнути дублів
   document.querySelectorAll("form[data-loading]").forEach((form) => {
-    form.addEventListener("submit", () => {
+    form.addEventListener("submit", (e) => {
+      if (e.defaultPrevented) return; // форму зупинила клієнтська перевірка — кнопку не блокуємо
       const btn = form.querySelector("button[type=submit]");
       if (btn) {
         btn.insertAdjacentHTML("afterbegin", '<span class="spinner" aria-hidden="true"></span> ');

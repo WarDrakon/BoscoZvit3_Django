@@ -34,12 +34,13 @@ NEUTRAL_SCORE = 0.5        # оцінка критерію, для якого б
 NOT_REQUIRED = "not_required"  # користувач обрав «Неважливо»
 
 LABELS = {
-    "budget": "Бюджет", "location": "Місто та район", "move_in": "Дата заселення", "sleep": "Режим сну",
-    "cleanliness": "Чистота", "noise": "Рівень шуму", "guests": "Гості", "smoking": "Куріння",
-    "pets": "Домашні тварини", "chores": "Побутові обов’язки",
+    "budget": "Бюджет", "location": "Місто та район", "move_in": "Дата заселення", "age": "Вік",
+    "sleep": "Режим сну", "cleanliness": "Чистота", "noise": "Рівень шуму", "guests": "Гості",
+    "smoking": "Куріння", "pets": "Домашні тварини", "chores": "Побутові обов’язки",
 }
 GOOD_TEXT = {
     "budget": "Бюджети збігаються", "location": "Збігається місто та район", "move_in": "Близькі дати заселення",
+    "age": "Вік відповідає бажаному діапазону",
     "sleep": "Схожий режим сну", "cleanliness": "Рівень чистоти відповідає очікуванням",
     "noise": "Рівень шуму відповідає очікуванням", "guests": "Схоже ставлення до гостей",
     "smoking": "Ставлення до куріння збігається", "pets": "Немає суперечностей щодо тварин",
@@ -47,6 +48,7 @@ GOOD_TEXT = {
 }
 BAD_TEXT = {
     "budget": "Бюджети суттєво відрізняються", "location": "Різні місто або район", "move_in": "Значна різниця в датах заселення",
+    "age": "Вік не відповідає бажаному діапазону",
     "sleep": "Різний режим сну", "cleanliness": "Рівень чистоти нижчий за очікуваний",
     "noise": "Рівень шуму може не влаштувати", "guests": "Різне ставлення до гостей",
     "smoking": "Конфлікт щодо куріння", "pets": "Конфлікт щодо домашніх тварин",
@@ -69,6 +71,7 @@ class Snapshot:
     budget_min: int | None = None
     budget_max: int | None = None
     move_in: date | None = None
+    age: int | None = None
     habits: dict = field(default_factory=dict)
     reqs: dict = field(default_factory=dict)
     weights: dict = field(default_factory=dict)
@@ -135,6 +138,20 @@ def _score_move_in(seeker, target):
         if days <= limit:
             return score
     return 0.0
+
+
+def _score_age(seeker, target):
+    minimum, maximum = seeker.reqs.get("req_age_min"), seeker.reqs.get("req_age_max")
+    if not minimum and not maximum:
+        return NOT_REQUIRED
+    actual = target.age
+    if actual is None:
+        return None
+    if minimum is not None and actual < minimum:
+        return max(0.0, 1.0 - (minimum - actual) / 20)
+    if maximum is not None and actual > maximum:
+        return max(0.0, 1.0 - (actual - maximum) / 20)
+    return 1.0
 
 
 def _score_sleep(seeker, target):
@@ -204,9 +221,9 @@ def _score_chores(seeker, target):
 
 
 SCORERS = {
-    "budget": _score_budget, "location": _score_location, "move_in": _score_move_in, "sleep": _score_sleep,
-    "cleanliness": _score_cleanliness, "noise": _score_noise, "guests": _score_guests, "smoking": _score_smoking,
-    "pets": _score_pets, "chores": _score_chores,
+    "budget": _score_budget, "location": _score_location, "move_in": _score_move_in, "age": _score_age,
+    "sleep": _score_sleep, "cleanliness": _score_cleanliness, "noise": _score_noise, "guests": _score_guests,
+    "smoking": _score_smoking, "pets": _score_pets, "chores": _score_chores,
 }
 
 
@@ -323,11 +340,14 @@ def build_snapshot(profile):
         district=search.district if search else "",
         budget_min=search.budget_min if search else None, budget_max=search.budget_max if search else None,
         move_in=(search.move_in_date if search and search.move_in_date else profile.move_in_date),
+        age=profile.age,
         habits={"sleep": getattr(lifestyle, "sleep_schedule", ""), "cleanliness": getattr(lifestyle, "cleanliness", None),
                 "noise": getattr(lifestyle, "noise_level", None), "guests": getattr(lifestyle, "guests_frequency", ""),
                 "smoking": getattr(lifestyle, "smoking", ""), "pets": getattr(lifestyle, "pets", ""),
                 "chores": getattr(lifestyle, "chores_attitude", "")},
-        reqs={"sleep": getattr(search, "req_sleep", "any"), "min_cleanliness": getattr(search, "req_min_cleanliness", None),
+        reqs={"sleep": getattr(search, "req_sleep", "any"), "req_age_min": getattr(search, "req_age_min", None),
+              "req_age_max": getattr(search, "req_age_max", None),
+              "min_cleanliness": getattr(search, "req_min_cleanliness", None),
               "max_noise": getattr(search, "req_max_noise", None), "guests": getattr(search, "req_guests", "any"),
               "smoking": getattr(search, "req_smoking", "any"), "pets": getattr(search, "req_pets", "any"),
               "chores": getattr(search, "req_chores", "any")},
