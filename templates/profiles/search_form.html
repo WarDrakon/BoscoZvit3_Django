@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block title %}Параметри пошуку — Roommate{% endblock %}
 {% block content %}
 <div class="page"><div class="narrow">
@@ -13,6 +14,8 @@
           {% include "components/field.html" with field=form.budget_min %}{% include "components/field.html" with field=form.budget_max %}
           {% include "components/field.html" with field=form.move_in_date %}
         </div>
+        {{ form.city_suggestions|json_script:"city-suggestions-data" }}
+        {{ form.district_suggestions|json_script:"district-suggestions-data" }}
       </fieldset>
     </div>
     <div class="card">
@@ -28,13 +31,18 @@
     </div>
     <div class="card">
       <fieldset><legend>Важливість критеріїв</legend>
-        <p class="muted small">Вага від 1 (майже не важливо) до 5 (дуже важливо) визначає внесок критерію в підсумковий відсоток. «Критична» означає, що порушення цієї вимоги робить кандидата неприйнятним — такі кандидати показуються окремо із попередженням.</p>
-        <div class="table-scroll"><table class="weights"><thead><tr><th scope="col">Критерій</th><th scope="col">Вага</th><th scope="col">Критична</th></tr></thead><tbody>
-          {% for row in form.weight_rows %}<tr><td>{{ row.label }}</td><td>{{ row.weight }}</td><td>{{ row.critical }}</td></tr>{% endfor %}
+        <p class="muted small">Позначайте лише важливі для вас умови.</p>
+        <div class="table-scroll"><table class="weights"><thead><tr><th scope="col">Критерій</th><th scope="col">Важливість</th><th scope="col">Обов’язково?</th></tr></thead><tbody>
+          {% for row in form.weight_rows %}<tr data-criterion="{{ row.key }}"><td>{{ row.label }}<div class="muted small criterion-state" aria-live="polite"></div></td><td>{{ row.weight }}</td><td>{{ row.critical }}</td></tr>{% endfor %}
         </tbody></table></div>
+        <div class="criteria-overview" aria-live="polite">
+          <strong>Ваші налаштовані критерії</strong>
+          <ul id="criteria-active-summary" class="criteria-summary"></ul>
+        </div>
       </fieldset>
     </div>
     <div class="form-actions"><button class="btn btn-primary" type="submit">Зберегти та показати рекомендації</button><a class="btn btn-secondary" href="{% url 'profiles:view' %}">Скасувати</a></div>
   </form>
+  <script src="{% static 'js/search-criteria.js' %}" defer></script>
 </div></div>
 {% endblock %}

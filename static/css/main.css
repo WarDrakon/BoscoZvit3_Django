@@ -412,3 +412,26 @@ section.dark .section-head p{color:#C3BEEA}
 .live-error[hidden]{display:none}
 .input.is-invalid{border-color:var(--bad);box-shadow:0 0 0 3px rgba(180,35,24,.12)}
 .cand-name,.page-head h1,.cand-head h2{overflow-wrap:anywhere}
+
+/* Взаємозалежні вимоги та їхня важливість */
+.weights tr.criterion-inactive {opacity:.55;background:var(--cream)}
+.weights tr.criterion-inactive select,.weights tr.criterion-inactive input {cursor:not-allowed}
+.criterion-state {font-size:.77rem;margin-top:.18rem}
+.criteria-overview {margin-top:1rem;padding:1rem 1.15rem;background:var(--violet-l);border:1px solid var(--line-2);border-radius:var(--r)}
+.criteria-overview p {margin:.3rem 0 .6rem}
+.criteria-summary {margin:0;padding-left:1.2rem;columns:2;column-gap:1.75rem}
+.criteria-summary li {break-inside:avoid;margin-bottom:.35rem}
+@media (max-width:650px) {.criteria-summary {columns:1}}
+
+/* Пошук міста / району: керований випадаючий список замість datalist */
+.rm-combobox{position:relative;width:100%;min-width:0}
+.rm-combobox > input{width:100%;padding-right:2.75rem}
+.rm-combobox-toggle{position:absolute;right:.45rem;top:50%;transform:translateY(-50%);border:0;background:transparent;color:var(--ink);cursor:pointer;padding:.5rem .7rem;font-size:1.25rem;line-height:1;border-radius:.5rem}
+.rm-combobox-toggle:hover{background:var(--violet-l)}
+.rm-combobox-menu{position:absolute;top:calc(100% + .35rem);left:0;right:0;z-index:50;max-height:230px;overflow-y:auto;background:var(--paper);border:1px solid var(--line-2);border-radius:.85rem;box-shadow:0 12px 32px rgba(22,16,50,.16);padding:.3rem}
+.rm-combobox-menu[hidden]{display:none}
+.rm-combobox-option{display:block;width:100%;text-align:left;border:0;border-radius:.55rem;background:transparent;color:var(--ink);padding:.7rem .85rem;cursor:pointer;font:inherit}
+.rm-combobox-option:hover,.rm-combobox-option.is-highlighted{background:var(--violet-l)}
+.rm-combobox-empty{color:var(--muted);padding:.75rem;font-size:.9rem}
+/* Проміжок між верхніми картками профілю та блоком «Мої вимоги» */
+.profile-cards + .profile-requirements{margin-top:1.5rem}

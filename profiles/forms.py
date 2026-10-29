@@ -1,5 +1,7 @@
 from django import forms
 
+from housing.models import HousingListing
+
 from config.forms import LiveValidationMixin, StyledFormMixin
 
 from .models import CRITERIA, CriterionWeight, LifestylePreference, Profile, SearchPreference
@@ -66,25 +68,65 @@ class SearchForm(StyledFormMixin, forms.ModelForm):
         model = SearchPreference
         fields = ["city", "district", "budget_min", "budget_max", "move_in_date", "req_age_min", "req_age_max",
                   "req_sleep", "req_min_cleanliness", "req_max_noise", "req_guests", "req_smoking", "req_pets", "req_chores"]
-        widgets = {"budget_min": forms.NumberInput(attrs={"min": 0, "step": 100, "placeholder": "напр. 5000"}),
+        widgets = {"city": forms.TextInput(attrs={"autocomplete": "off", "placeholder": "Оберіть або введіть місто"}),
+                   "district": forms.TextInput(attrs={"autocomplete": "off", "placeholder": "Оберіть або введіть район"}),
+                   "budget_min": forms.NumberInput(attrs={"min": 0, "step": 100, "placeholder": "напр. 5000"}),
                    "budget_max": forms.NumberInput(attrs={"min": 0, "step": 100, "placeholder": "напр. 8000"})}
+
+    # Визначаємо, чи користувач справді задав вимогу для критерію.
+    CRITERION_FIELDS = {
+        "budget": ("budget_min", "budget_max"),
+        "location": ("city", "district"),
+        "move_in": ("move_in_date",),
+        "age": ("req_age_min", "req_age_max"),
+        "sleep": ("req_sleep",),
+        "cleanliness": ("req_min_cleanliness",),
+        "noise": ("req_max_noise",),
+        "guests": ("req_guests",),
+        "smoking": ("req_smoking",),
+        "pets": ("req_pets",),
+        "chores": ("req_chores",),
+    }
+
+    @staticmethod
+    def _specified(value):
+        return value is not None and value != "" and value != "any"
+
+    def _active(self, key, values):
+        return any(self._specified(values.get(field)) for field in self.CRITERION_FIELDS[key])
 
     def __init__(self, *args, profile=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.profile = profile
+        # Only public housing locations are offered as suggestions; free text stays valid.
+        locations = HousingListing.objects.filter(is_active=True, is_hidden=False).values_list("city", "district").distinct()
+        self.city_suggestions = sorted({city.strip() for city, _ in locations if city and city.strip()})
+        self.district_suggestions = {}
+        for city, district in locations:
+            if city and city.strip() and district and district.strip():
+                self.district_suggestions.setdefault(city.strip(), set()).add(district.strip())
+        self.district_suggestions = {city: sorted(districts) for city, districts in self.district_suggestions.items()}
         saved = {w.criterion: w for w in profile.weights.all()} if profile else {}
         for key, label in CRITERIA:
             current = saved.get(key)
             self.fields[f"w_{key}"] = forms.TypedChoiceField(
-                label=f"Важливість: {label}", coerce=int, initial=current.weight if current else 3,
+                label=f"Наскільки важливо: {label}", required=False, coerce=int, empty_value=3, initial=current.weight if current else 3,
                 choices=[(i, str(i)) for i in range(1, 6)], widget=forms.Select(attrs={"class": "select"}))
             self.fields[f"c_{key}"] = forms.BooleanField(
-                label=f"Критична вимога: {label}", required=False, initial=current.is_critical if current else False,
+                label=f"Обов’язкова умова: {label}", required=False, initial=current.is_critical if current else False,
                 widget=forms.CheckboxInput(attrs={"class": "check"}))
+
+    def clean(self):
+        cleaned = super().clean()
+        for key, _ in CRITERIA:
+            if not self._active(key, cleaned):
+                cleaned[f"w_{key}"] = 3
+                cleaned[f"c_{key}"] = False
+        return cleaned
 
     def weight_rows(self):
         """Рядки таблиці важливості для шаблону."""
-        return [{"label": label, "weight": self[f"w_{key}"], "critical": self[f"c_{key}"]} for key, label in CRITERIA]
+        return [{"key": key, "label": label, "weight": self[f"w_{key}"], "critical": self[f"c_{key}"]} for key, label in CRITERIA if key != "age"]
 
     def save(self, commit=True):
         instance = super().save(commit=commit)

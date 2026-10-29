@@ -61,6 +61,21 @@ class ProfileTests(TestCase):
         self.assertTrue(CriterionWeight.objects.get(profile=self.user.profile, criterion="smoking").is_critical)
         self.assertEqual(CriterionWeight.objects.filter(profile=self.user.profile).count(), 11)
 
+    def test_unspecified_requirement_disables_critical_on_server(self):
+        data = {"req_sleep": "any", "req_guests": "any", "req_smoking": "any",
+                "req_pets": "any", "req_chores": "any", "c_smoking": "on", "w_smoking": "5"}
+        form = SearchForm(data, instance=SearchPreference(profile=self.user.profile), profile=self.user.profile)
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["w_smoking"], 3)
+        self.assertFalse(form.cleaned_data["c_smoking"])
+
+    def test_selected_requirement_keeps_weight_and_critical(self):
+        data = {"req_smoking": "no_inside", "w_smoking": "5", "c_smoking": "on"}
+        form = SearchForm(data, instance=SearchPreference(profile=self.user.profile), profile=self.user.profile)
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data["w_smoking"], 5)
+        self.assertTrue(form.cleaned_data["c_smoking"])
+
     def test_search_form_budget_min_greater_than_max(self):
         data = {"budget_min": "9000", "budget_max": "5000", "req_sleep": "any", "req_guests": "any", "req_smoking": "any",
                 "req_pets": "any", "req_chores": "any"}

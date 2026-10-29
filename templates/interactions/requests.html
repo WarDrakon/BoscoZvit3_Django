@@ -7,7 +7,13 @@
   <div class="card"><h2>Вхідні</h2>
     {% for r in incoming %}
       <div class="row-item">{% include "components/avatar.html" with profile=r.sender.profile %}
-        <div class="row-main"><a href="{% url 'matching:candidate' r.sender.profile.pk %}"><strong>{{ r.sender.profile.display_name }}</strong></a>
+        <div class="row-main">{% if r.sender.profile.pk %}
+    <a href="{% url 'matching:candidate' r.sender.profile.pk %}">
+        {{ r.sender.profile.display_name }}
+    </a>
+{% else %}
+    <span>{{ r.sender.get_full_name|default:r.sender.email }}</span>
+{% endif %}
           {% if r.housing %}<span class="muted small"> · щодо «{{ r.housing.title }}»</span>{% endif %}
           <div class="muted small">{{ r.created_at|date:"d.m.Y H:i" }} · <span class="tag {% if r.status == 'accepted' %}tag-good{% elif r.status == 'pending' %}tag-warn{% endif %}">{{ r.get_status_display }}</span></div>
           {% if r.message %}<p style="margin:.4rem 0 0">{{ r.message }}</p>{% endif %}</div>

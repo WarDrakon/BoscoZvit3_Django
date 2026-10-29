@@ -7,7 +7,7 @@
     <a class="btn btn-light" href="{% url 'profiles:search' %}">Параметри пошуку</a></div></div></div></section>
 <div class="page"><div class="container">
   
-  <div class="grid grid-2">
+  <div class="grid grid-2 profile-cards">
     <div class="card">
       <div class="cand-head" style="margin-bottom:1rem">{% include "components/avatar.html" with large=True %}
         <div><h2 style="margin:0">{{ profile.display_name }}{% if profile.age_text %}, {{ profile.age_text }}{% endif %}</h2><div class="muted">{% if not profile.age_text %}Вік не вказано · {% endif %}{{ profile.city|default:"Місто не вказано" }}</div>
@@ -34,7 +34,7 @@
       </dl>
     </div>
   </div>
-  <div class="card">
+  <div class="card profile-requirements">
     <h2>Мої вимоги</h2>
     <dl class="facts">
       <dt>Місто / район</dt><dd>{{ search.city|default:"—" }}{% if search.district %}, {{ search.district }}{% endif %}</dd>
